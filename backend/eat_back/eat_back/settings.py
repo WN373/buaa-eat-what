@@ -80,7 +80,7 @@ DATABASES = {
         "USER": "buaaer",
         "PASSWORD": "GB6fR8hsA4eBMcXx",
         "HOST": "8.130.46.128",
-        "PORT": "1433",
+        "PORT": "3306",
     }
 }
 
