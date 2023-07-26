@@ -1,8 +1,9 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 
 # GPT assisted
 
@@ -20,6 +21,7 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 @csrf_exempt
 def register_view(request):
@@ -39,9 +41,32 @@ def register_view(request):
         form = UserCreationForm()
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+
+def user_info(request):
+    if request.user.is_authenticated and request.method == 'GET':
+        return JsonResponse({'code': 200, 'msg': '已登录',
+                             'data': {'username': request.user.username,
+                                      'userid': request.user.id,
+                                      'email': request.user.email
+                                      }})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+def modify_user_info(request):
+    if request.user.is_authenticated and request.method == 'POST':
+        form = UserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'code': 200, 'msg': '修改成功'})
+        else:
+            return JsonResponse({'code': 400, 'msg': '表单不合法'})
+    return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 def index(request):
     return HttpResponse('主页面')
