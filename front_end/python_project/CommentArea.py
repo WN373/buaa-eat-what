@@ -3,7 +3,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QIcon, QFont
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QPlainTextEdit
 import datetime
-from examples.gallery.app.common.style_sheet import StyleSheet
 from qfluentwidgets import ScrollArea, TitleLabel, CaptionLabel, FluentIcon, PushButton, StrongBodyLabel, ToolButton, \
     TransparentToolButton, CardWidget, setThemeColor, CheckBox, PrimaryPushButton, InfoBar, InfoBarPosition
 

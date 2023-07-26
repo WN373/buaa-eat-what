@@ -33,9 +33,9 @@ if __name__ == '__main__':
     translator = FluentTranslator(QLocale())
     app.installTranslator(translator)
 
-    # w = LoginWindow()
+    w = LoginWindow()
     # w = MainWindow()
-    w = MulClassShow([])
+    # w = MulClassShow([])
     # w = AddBuyCard()
     # w = showTop15Window()
     # w = DishDetailWindow()
