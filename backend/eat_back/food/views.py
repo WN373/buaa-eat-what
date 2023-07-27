@@ -7,7 +7,7 @@ from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
 # create_food
-# format:
+# post:
 # {
 #     'food_name': '菜品名称',
 #     'price': '价格',
@@ -25,7 +25,7 @@ def create_food(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
-# format:
+# get:
 # { 'food_name': '菜品名称' }
 def get_food_by_name(request):
     if request.method == 'GET':
