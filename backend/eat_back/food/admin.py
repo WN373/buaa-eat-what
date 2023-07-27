@@ -1,7 +1,6 @@
 from django.contrib import admin
-
-from food.models import FoodInfo, UsrInfo
+from .models import FoodInfo, FoodComments
 
 # Register your models here.
 admin.site.register(FoodInfo)
-admin.site.register(UsrInfo)
+admin.site.register(FoodComments)

@@ -12,8 +12,9 @@ class FoodInfo(models.Model):
 
 
 class FoodComments(models.Model):
+    id = models.AutoField(primary_key=True)
     food = models.ForeignKey(FoodInfo, on_delete=models.CASCADE, verbose_name='菜品')
     replied = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name='回复')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
-    comment = models.CharField(verbose_name='评论内容')
+    comment = models.CharField(max_length=256, verbose_name='评论内容')
     created = models.DateTimeField(auto_now_add=True, verbose_name='评论时间')
