@@ -3,8 +3,56 @@ from django.shortcuts import render
 # Create your views here.
 from .models import *
 from django.http import JsonResponse
+from .forms import FoodInfoForm
+from django.views.decorators.csrf import csrf_exempt
+
+# create_food
+# format:
+# {
+#     'food_name': '菜品名称',
+#     'price': '价格',
+#     'tags': '标签'
+# }
+@csrf_exempt
+def create_food(request):
+    if request.method == 'POST':
+        form = FoodInfoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'code': 200, 'msg': '创建成功'})
+        else:
+            return JsonResponse({'code': 400, 'msg': '创建失败(您的表单格式可能错误)', 'error': '???'})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+# format:
+# { 'food_name': '菜品名称' }
+def get_food_by_name(request):
+    if request.method == 'GET':
+        food_name = request.GET.get('food_name')
+        foods = FoodInfo.objects.filter(food_name=food_name)
+        print(len(foods), food_name)
+        data = [{
+            'id': food.id,
+            'food_name': food.food_name,
+            'price': food.price,
+            'tags': ', '.join(food.tags.values_list('name', flat=True)),
+            'rating': food.rating,
+            'stars': food.stars,
+            'purchases': food.purchases,
+            'created': food.created
+        } for food in foods]
+        print(data)
+        return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data}, safe=False)
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 
+# get_food_list
+# format:
+# {
+#    'food_name': '菜品名称',
+# }
 def get_comment_list(request):
     if request.method == 'GET':
         food_name = request.GET.get('food_name')
