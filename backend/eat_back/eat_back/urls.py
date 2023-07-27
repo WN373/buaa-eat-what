@@ -22,6 +22,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("hello/", views.hello, name="hello"),
     path("login/", include("login.urls")),
+    path("food/", include("food.urls")),
 ]
 
 
