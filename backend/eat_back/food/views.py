@@ -17,17 +17,66 @@ def create_food_favor(request):
     if request.method == 'POST':
         try:
             food_name = request.POST.get('food_name')
-            food = FoodInfo.objects.filter(food_name=food_name)
+            food = FoodInfo.objects.get(food_name=food_name)
             username = request.POST.get('username')
-            user = User.objects.filter(username=username)
-            food_favor = FoodFavor(food=food)
+            user = User.objects.get(username=username)
+            food_favor = FoodFavor(food=food, user=user)
             food_favor.save()
+            food.stars += 1
+            food.save()
             return JsonResponse({'code': 200, 'msg': '创建成功'})
         except Exception as e:
             return JsonResponse({'code': 400, 'msg': '创建失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
+# delete_food_favor
+# post:
+# {
+#     'food_name': '菜品名称',
+#     'username': '用户名',
+# }
+@csrf_exempt
+def delete_food_favor(request):
+    if request.method == 'POST':
+        try:
+            food_name = request.POST.get('food_name')
+            food = FoodInfo.objects.get(food_name=food_name)
+            username = request.POST.get('username')
+            user = User.objects.get(username=username)
+            food_favor = FoodFavor.objects.get(food=food, user=user)
+            food_favor.delete()
+            food.stars -= 1
+            food.save()
+            return JsonResponse({'code': 200, 'msg': '删除成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '删除失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+# get_food_favor
+# get:
+# {
+#     'username': '用户名',
+# }
+def get_food_favor(request):
+    if request.method == 'GET':
+        try:
+            username = request.GET.get('username')
+            user = User.objects.get(username=username)
+            food_favors = FoodFavor.objects.filter(user=user)
+            data = [{
+                'id': food_favor.id,
+                'food_name': food_favor.food.food_name,
+                'username': food_favor.user.username,
+                'created': food_favor.created
+            } for food_favor in food_favors]
+            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 # create_food
 # post:
