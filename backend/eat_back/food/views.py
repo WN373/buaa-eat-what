@@ -327,16 +327,6 @@ def get_food_by_name(request):
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 
-@csrf_exempt
-def create_purchase(request):
-    if request.method == 'POST':
-        food_name = request.POST.get('food_name')
-        food = FoodInfo.objects.filter(food_name=food_name)
-        purchase = FoodPurchase(food=food)
-        purchase.save()
-        return JsonResponse({'code': 200, 'msg': '创建成功'})
-
-
 # get_comment_list
 # /food/comment/
 # get:
@@ -360,6 +350,31 @@ def get_comment_list(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
+
+    
+# buy_food
+# post:
+# {
+#     'food_name': '菜品名称',
+#     'username': '用户名',
+# }
+def buy_food(request):
+    if request.method == 'POST':
+        food_name = request.POST.get('food_name')
+        username = request.POST.get('username')
+        user = User.objects.filter(username=username)
+        food = FoodInfo.objects.filter(food_name=food_name)
+        if len(user) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到用户'})
+        if len(food) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到食物'})
+        else:
+            FoodPurchase.objects.create(food=food[0], user=user[0])
+            return JsonResponse({'code': 200, 'msg': food_name})
+    else:
+        return JsonResponse({'code': 400, 'msg': request.method})
+        
 
 # post_new_comment
 # format:

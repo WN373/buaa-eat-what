@@ -65,6 +65,7 @@ def modify_password(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 def logout_view(request):
     logout(request)
     return redirect('index')

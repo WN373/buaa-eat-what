@@ -10,4 +10,3 @@ admin.site.register(RegionInfo)
 admin.site.register(RegionFavor)
 admin.site.register(CounterInfo)
 admin.site.register(CounterFavor)
-
