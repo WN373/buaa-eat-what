@@ -65,7 +65,7 @@ def get_food_favor(request):
         try:
             username = request.GET.get('username')
             user = User.objects.get(username=username)
-            food_favors = FoodFavor.objects.filter(user=user)
+            food_favors = FoodFavor.objects.filter(user=user).order_by('-created')
             data = [{
                 'id': food_favor.id,
                 'food_name': food_favor.food.food_name,

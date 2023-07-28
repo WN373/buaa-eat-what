@@ -10,4 +10,5 @@ urlpatterns = [
     path('getfoodbyname/', get_food_by_name, name='get_food_by_name'),
     path('favorfood/', create_food_favor, name='create_food_favor'),
     path('unfavorfood/', delete_food_favor, name='delete_food_favor'),
+    path('getfoodfavor/', get_food_favor, name='get_food_favor'),
 ]
