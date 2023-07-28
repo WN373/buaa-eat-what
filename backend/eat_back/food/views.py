@@ -8,24 +8,34 @@ from django.views.decorators.csrf import csrf_exempt
 
 # create_food_favor
 # post:
-
+# {
+#     'food_name': '菜品名称',
+#     'username': '用户名',
+# }
 @csrf_exempt
 def create_food_favor(request):
     if request.method == 'POST':
-        food_name = request.POST.get('food_name')
-        food = FoodInfo.objects.filter(food_name=food_name)
-        username = request.POST.get('username')
-        user = User.objects.filter(username=username)
-        food_favor = FoodFavor(food=food)
-        food_favor.save()
-        return JsonResponse({'code': 200, 'msg': '创建成功'})
+        try:
+            food_name = request.POST.get('food_name')
+            food = FoodInfo.objects.filter(food_name=food_name)
+            username = request.POST.get('username')
+            user = User.objects.filter(username=username)
+            food_favor = FoodFavor(food=food)
+            food_favor.save()
+            return JsonResponse({'code': 200, 'msg': '创建成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '创建失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # create_food
 # post:
 # {
 #     'food_name': '菜品名称',
 #     'price': '价格',
-#     'tags': '标签'
+#     'tags': '标签',
+#     'food_url': '图片地址',
 # }
 @csrf_exempt
 def create_food(request):
@@ -38,7 +48,7 @@ def create_food(request):
             finally:
                 return JsonResponse({'code': 200, 'msg': '创建成功'})
         else:
-            return JsonResponse({'code': 400, 'msg': '创建失败(您的表单格式可能错误)', 'error': '???'})
+            return JsonResponse({'code': 400, 'msg': '创建失败(您的表单格式可能错误)', 'error': str(form.errors)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
@@ -75,7 +85,7 @@ def create_purchase(request):
         return JsonResponse({'code': 200, 'msg': '创建成功'})
 
 
-# get_food_list
+# get_comment_list
 # format:
 # {
 #    'food_name': '菜品名称',
@@ -114,6 +124,8 @@ def post_new_comment(request):
             user = User.objects.get(username=username)
             food = FoodInfo.objects.get(food_name=food_name)
             FoodComments.objects.create(food_id=food.id, replied_id=replied, user_id=user.id, comment=comment)
+            food.comments += 1
+            food.save()
             return JsonResponse({'code': 200, 'msg': '评论成功'})
         except Exception as e:
             return JsonResponse({'code': 400, 'msg': '评论失败', 'error': str(e)})
