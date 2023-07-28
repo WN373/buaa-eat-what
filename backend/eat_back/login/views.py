@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, models
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -42,31 +42,32 @@ def register_view(request):
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 
+# modify_password
+# /login/modify/
+# post:
+# {
+#    'username': '用户名',
+#    'password': '新密码'
+# }
+@csrf_exempt
+def modify_password(request):
+    if request.method == 'POST':
+        try:
+            username = request.POST.get('username')
+            user = models.User.objects.get(username=username)
+            password = request.POST.get('password')
+            print('modifying',username, password)
+            user.set_password(password)
+            user.save()
+            return JsonResponse({'code': 200, 'msg': '修改成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '修改失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 def logout_view(request):
     logout(request)
     return redirect('index')
 
-
-def user_info(request):
-    if request.user.is_authenticated and request.method == 'GET':
-        return JsonResponse({'code': 200, 'msg': '已登录',
-                             'data': {'username': request.user.username,
-                                      'userid': request.user.id,
-                                      'email': request.user.email
-                                      }})
-    else:
-        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
-
-def modify_user_info(request):
-    if request.user.is_authenticated and request.method == 'POST':
-        form = UserChangeForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'code': 200, 'msg': '修改成功'})
-        else:
-            return JsonResponse({'code': 400, 'msg': '表单不合法'})
-    return JsonResponse({'code': 400, 'msg': '请求方式错误'})
-
-
 def index(request):
-    return HttpResponse('主页面')
+    return HttpResponse('login index')
