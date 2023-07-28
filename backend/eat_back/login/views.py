@@ -46,7 +46,7 @@ def register_view(request):
 # post:
 # {
 #    'username': '用户名',
-#    'newpassword': '新密码'
+#    'password': '新密码'
 # }
 @csrf_exempt
 def modify_password(request):
@@ -54,8 +54,10 @@ def modify_password(request):
         try:
             username = request.POST.get('username')
             user = models.User.objects.get(username=username)
-            password = request.POST.get('newpassword')
+            password = request.POST.get('password')
+            print('modifying',username, password)
             user.set_password(password)
+            user.save()
             return JsonResponse({'code': 200, 'msg': '修改成功'})
         except Exception as e:
             return JsonResponse({'code': 400, 'msg': '修改失败', 'error': str(e)})
