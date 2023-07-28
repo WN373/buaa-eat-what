@@ -1,6 +1,8 @@
+import re
 import sys
 import time
 
+import requests
 from PyQt5.QtCore import Qt, QTranslator, QLocale
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -10,17 +12,48 @@ from qfluentwidgets import setThemeColor, FluentTranslator, setTheme, Theme, Spl
 from PyQt5 import QtCore, QtGui, QtWidgets
 from main_interface import MainWindow
 # 数据库函数 =======================================
+
+
+def checkUsername(username: str) -> bool:
+    # 检查长度是否满足要求
+    if len(username) > 20:
+        return False
+
+    # 使用正则表达式检查是否只包含字母、数字、特殊字符@、.、-和_
+    pattern = r'^[a-zA-Z0-9@.\-_]+$'
+    if re.match(pattern, username):
+        return True
+    else:
+        return False
 def checkRegisterInfo(username, password) -> int:  # 检查用户名和是否合法以及用户名是否存在
     # 0-> 信息完全合法
     # 1-> 用户名格式错误
     # 2-> 用户名格式正确, 但 用户名已存在
     # 3-> 用户名完全合法, 但 密码格式错误
-    return 0
+    # if not checkUsername(username):
+    #     return 1
+    data = {
+        'username': username,
+        'password1': password,
+        'password2': password
+    }
+    url = 'http://localhost:8000/login/register/'
+    print(2)
+    reply = requests.post(url, data=data)
+    dic = reply.json()
+    print(dic)
+    if dic['code'] == 200:
+        print('ok!')
+        return 0
+    else:
+        print('error! return is ' + str(dic['code']))
+        return 1
 
 
 def registerToDb(username: str, password: str):
     # 向数据库注册用户(此时的用户名和密码已经通过合法性检验, 直接存入数据库)
     a = 1
+
 
 # 数据库函数 =======================================
 class Ui_Form_register(object):
@@ -28,12 +61,6 @@ class Ui_Form_register(object):
         Form.setObjectName("Form")
         Form.resize(496, 500)
         Form.setMinimumSize(QtCore.QSize(496, 500))  # 设定在调整窗口大小时的最小大小
-        # Form.setContentsMargins(70, 0, 0, 0)
-
-        # self.module = QtWidgets.QVBoxLayout(Form)
-        # self.module.setAlignment(QtCore.Qt.AlignCenter)
-
-
         # 创建一个窗口
         self.widget = QtWidgets.QWidget(Form)  # 设置父界面
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -48,14 +75,9 @@ class Ui_Form_register(object):
                                   "    font: 13px \'Microsoft YaHei\'\n"
                                   "}")
         self.widget.setObjectName("widget")
-        # self.verLayout.addWidget(self.widget)
-        #
         # 垂直布局
         self.verLayout = QtWidgets.QVBoxLayout(self.widget)  # 该模块的父亲木块是self
-        # self.verLayout.setContentsMargins(100, 20, 20, 20)
         self.verLayout.setContentsMargins(130, 0, 0, 0)  # 这个函数设置的是本身(本身不变)和外框之间的间距
-        # self.verLayout.setAlignment(QtCore.Qt.AlignCenter)
-        # self.verLayout.setAlignment(QtCore.Qt.AlignCenter)
         self.verLayout.setSpacing(9)
         self.verLayout.setObjectName("verLayout")
 
@@ -178,16 +200,12 @@ class RegisterWindow(AcrylicWindow, Ui_Form_register):
             if ret == 0:  # 注册成功
                 registerToDb(username, password1)
                 self.stateTooltip = StateToolTip('', '', self)
-                # self.stateTooltip.move(10, 10)
                 self.stateTooltip.setContent('注册成功!')
                 self.stateTooltip.setState(True)
                 self.stateTooltip.show()
-                # self.stateTooltip.
-                # self.stateTooltip.exec_()
                 self.parent.showSuccessRegister()
                 self.close()
             elif ret == 1:
-                # self.username_edit.setText('')
                 self.showErrorTip(self.username_edit, "用户名格式错误")
             elif ret == 2:
                 self.showErrorTip(self.username_edit, "用户名已存在, 请重新输入")

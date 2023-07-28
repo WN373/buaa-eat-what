@@ -1,9 +1,12 @@
 # 登录界面
+import json
 import sys
 import time
 
-from PyQt5.QtCore import Qt, QTranslator, QLocale
+import requests
+from PyQt5.QtCore import Qt, QTranslator, QLocale, QUrl, QByteArray
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
 from PyQt5.QtWidgets import QApplication, QWidget
 from qframelesswindow import FramelessWindow, StandardTitleBar, AcrylicWindow
 from qfluentwidgets import setThemeColor, FluentTranslator, setTheme, Theme, SplitTitleBar, TeachingTip, \
@@ -11,6 +14,7 @@ from qfluentwidgets import setThemeColor, FluentTranslator, setTheme, Theme, Spl
 from PyQt5 import QtCore, QtGui, QtWidgets
 from main_interface import MainWindow
 from register_interface import RegisterWindow
+
 
 # 数据库函数 =======================================
 def isCorrectUser(username: str, password: str) -> bool:  # 判断一对用户名密码是否正确
@@ -82,31 +86,7 @@ class Ui_Form_login(object):
         self.verticalLayout_2.addWidget(self.label_2, 0, QtCore.Qt.AlignHCenter)
         spacerItem1 = QtWidgets.QSpacerItem(20, 15, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout_2.addItem(spacerItem1)
-
         # 创建一个网格布局, 这是用来显示那个服务器的, 所以自然就用不到了
-        # self.gridLayout = QtWidgets.QGridLayout()
-        # self.gridLayout.setHorizontalSpacing(4)
-        # self.gridLayout.setVerticalSpacing(9)
-        # self.gridLayout.setObjectName("gridLayout")
-        # self.lineEdit = LineEdit(self.widget)
-        # self.lineEdit.setClearButtonEnabled(True)
-        # self.lineEdit.setObjectName("lineEdit")
-        # self.gridLayout.addWidget(self.lineEdit, 1, 0, 1, 1)
-        # self.label_3 = BodyLabel(self.widget)
-        # self.label_3.setObjectName("label_3")
-        # self.gridLayout.addWidget(self.label_3, 0, 0, 1, 1)
-        # self.lineEdit_2 = LineEdit(self.widget)
-        # self.lineEdit_2.setPlaceholderText("")
-        # self.lineEdit_2.setClearButtonEnabled(True)
-        # self.lineEdit_2.setObjectName("lineEdit_2")
-        # self.gridLayout.addWidget(self.lineEdit_2, 1, 1, 1, 1)
-        # self.label_4 = BodyLabel(self.widget)
-        # self.label_4.setObjectName("label_4")
-        # self.gridLayout.addWidget(self.label_4, 0, 1, 1, 1)
-        # self.gridLayout.setColumnStretch(0, 2)
-        # self.gridLayout.setColumnStretch(1, 1)
-        # self.verticalLayout_2.addLayout(self.gridLayout)
-
         # 创建一个label_5对象, 先加进去, 后面有专门的赋值函数
         self.label_5 = BodyLabel(self.widget)
         self.label_5.setObjectName("label_5")
@@ -131,30 +111,11 @@ class Ui_Form_login(object):
         spacerItem2 = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout_2.addItem(spacerItem2)
 
-        # grid布局
-        # self.grid = QtWidgets.QGridLayout()
-        # self.grid.setHorizontalSpacing(4)
-        # self.grid.setVerticalSpacing(9)
-        # self.grid.setObjectName('grid')
-
-
-
         # 设置一个复选框, 表示是否记住密码
         self.checkBox = CheckBox(self.widget)
         self.checkBox.setChecked(True)  # 默认勾选
         self.checkBox.setObjectName("checkBox")
         self.verticalLayout_2.addWidget(self.checkBox)
-
-
-
-
-
-        # self.register_label = PrimaryPushButton(self.widget)
-        # self.register_button.setObjectName("register_button")
-        # self.horizontalLayout.addWidget(self.register_button)
-
-
-
 
         spacerItem3 = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout_2.addItem(spacerItem3)
@@ -172,8 +133,6 @@ class Ui_Form_login(object):
         self.register_button.setText('点击注册')
         spacerItem4 = QtWidgets.QSpacerItem(20, 6, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout_2.addItem(spacerItem4)
-
-
 
         # 添加一个HyperlinkButton, 超链接按钮, 用于找回密码
         self.pushButton_2 = HyperlinkButton(self.widget)
@@ -194,10 +153,6 @@ class Ui_Form_login(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        # self.lineEdit.setPlaceholderText(_translate("Form", "ftp.example.com"))
-        # self.label_3.setText(_translate("Form", "主机"))  # 设置输入框的提示信息
-        # self.lineEdit_2.setText(_translate("Form", "21"))
-        # self.label_4.setText(_translate("Form", "端口"))
         self.label_5.setText(_translate("Form", "用户名"))
         self.lineEdit_3.setPlaceholderText(_translate("Form", "请输入用户名"))
         self.label_6.setText(_translate("Form", "密码"))
@@ -223,7 +178,6 @@ class LoginWindow(AcrylicWindow, Ui_Form_login):
         self.titleBar.raise_()
 
         self.label.setScaledContents(False)  # 图片缩放内容属性
-        # self.setWindowTitle('PyQt-Fluent-Widget')
         self.setWindowTitle('BUAA delicious Food')  # 窗口标题
         self.setWindowIcon(QIcon(":/images/logo.png"))  # 窗口标题图标
         self.resize(1000, 650)  # 设置窗口的大小
@@ -250,31 +204,28 @@ class LoginWindow(AcrylicWindow, Ui_Form_login):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.pushButton.clicked.connect(self.clickLogin)
-        # self.pushButton_2.clicked.connect(self.clickRegister)
         self.register_button.clicked.connect(self.clickRegister)
 
     def clickLogin(self):
+        # global global_username
         username = self.lineEdit_3.text()
         password = self.lineEdit_4.text()
-        if isCorrectUser(username, password):
+        url = 'http://127.0.0.1:8000/login/login/'
 
-            # time.sleep(5)
-
+        # 设置POST请求的数据
+        data = {
+            'username': username,
+            'password': password
+        }
+        reply = requests.post(url, data=data)
+        dic = reply.json()
+        if dic['code'] == 200:
             # 切换到主界面
+            import global_vars
+            global_vars.setUsername(username)
             self.close()
             self.toMainInterface = MainWindow()
             self.toMainInterface.show()
-
-            # TeachingTip.create(
-            #     target=self.pushButton,
-            #     icon=InfoBarIcon.SUCCESS,
-            #     title='Success!',
-            #     content="登录成功!",
-            #     isClosable=True,
-            #     tailPosition=TeachingTipTailPosition.TOP,
-            #     duration=1000,
-            #     parent=self
-            # )
         else:
             # 账号密码输入错误, 重新输入
             TeachingTip.create(

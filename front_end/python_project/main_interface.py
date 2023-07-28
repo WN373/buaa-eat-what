@@ -7,6 +7,7 @@ from PyQt5.QtGui import QIcon, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar, AcrylicWindow
 
+from MulClassShow import MulClassShow
 from home_interface import HomeWindow
 from settings_interface import MySettingsWindow
 from qfluentwidgets import setThemeColor, FluentTranslator, setTheme, Theme, SplitTitleBar, CalendarPicker, \
@@ -25,6 +26,9 @@ class MainWindow(FluentWindow):
         self.addSubInterface(self.homeWindow, FluentIcon.HOME, '首页')
         self.settingsWindow = MySettingsWindow(self)
         self.addSubInterface(self.settingsWindow, FluentIcon.SETTING, '个人设置', NavigationItemPosition.BOTTOM)
+        self.hallsWindow = MulClassShow([], '食堂一览', '在这里可以找到所有食堂, 柜台, 菜品的信息哦 ~', self)
+        self.hallsWindow.setObjectName('hallsWindow')
+        self.addSubInterface(self.hallsWindow, QIcon('resource/images/all.png'), '食堂一览')
         self.resize(900, 700)
         self.setWindowTitle('wuhu!!!!!!')
         self.setWindowIcon(QIcon(":/images/logo.png"))

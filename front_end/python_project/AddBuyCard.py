@@ -31,6 +31,8 @@ class AddBuyCard(CardWidget):
         self.visitMoreStarButton.clicked.connect(self.clickVisitMoreStarButton)
 
     def clickAddButton(self):
+        import global_vars
+        print(global_vars.getUsername())
         day = self.dayPicker.text()
         detailTime = self.detailPicker.text()
         remark = self.lineEdit.text()
@@ -128,13 +130,28 @@ class AddBuyCard(CardWidget):
         self.remarkInHor = QtWidgets.QHBoxLayout()
         self.remarkCard.setLayout(self.remarkInHor)
         self.remarkHint = BodyLabel()
-        self.remarkHint.setText('📝购买备注: ')
+        self.remarkHint.setText('📝菜品名称: ')
 
         self.lineEdit = LineEdit()
-        self.lineEdit.setPlaceholderText('在这里输入您对此条记录的备注哦 ~')
+        self.lineEdit.setPlaceholderText('输入菜名 ~')
         self.remarkInHor.addWidget(self.remarkHint)
         self.remarkInHor.addWidget(self.lineEdit)
         self.horRemark.addWidget(self.remarkCard)
+
+        self.satistyLabel = BodyLabel()
+        self.satistyLabel.setText('打分: ')
+        self.remarkInHor.addWidget(self.satistyLabel)
+
+        # self.spinBox = SpinBox()
+        # self.spinBox.setRange(1, 10)
+        # self.spinBox.setFixedHeight(29)
+        # self.spinBox.setFixedWidth(100)
+        self.satisfyPicker = ComboBox()
+        self.satisfyPicker.addItems(['1', '2', '3', '4', '5'])
+        self.remarkInHor.addWidget(self.satisfyPicker)
+
+
+
 
     def buildAddButton(self):
         self.horButton = QtWidgets.QHBoxLayout()

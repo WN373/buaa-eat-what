@@ -5,13 +5,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, qApp, QFrame
 from qframelesswindow import FramelessWindow, StandardTitleBar, AcrylicWindow
 
-from AddBuyCard import AddBuyCard
-from CommentArea import ReplyWindow
-from DishesListView import DishesListView
 from MulClassShow import MulClassShow
-from RecommendCard import RecommendCard
-from TopShowCard import showTop15Window
-from home_interface import DishDetailWindow
 from login_interface import *
 from qfluentwidgets import setThemeColor, FluentTranslator, setTheme, Theme, SplitTitleBar, CardWidget, FluentIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
@@ -33,8 +27,8 @@ if __name__ == '__main__':
     translator = FluentTranslator(QLocale())
     app.installTranslator(translator)
 
-    w = LoginWindow()
-    # w = MainWindow()
+    # w = LoginWindow()
+    w = MainWindow()
     # w = MulClassShow([])
     # w = AddBuyCard()
     # w = showTop15Window()
