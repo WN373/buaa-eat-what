@@ -1,8 +1,9 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 
 # GPT assisted
 
@@ -20,6 +21,7 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 @csrf_exempt
 def register_view(request):
@@ -39,9 +41,10 @@ def register_view(request):
         form = UserCreationForm()
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 def logout_view(request):
     logout(request)
     return redirect('index')
 
 def index(request):
-    return HttpResponse('主页面')
+    return HttpResponse('login index')

@@ -207,20 +207,11 @@ class LoginWindow(AcrylicWindow, Ui_Form_login):
         self.register_button.clicked.connect(self.clickRegister)
 
     def clickLogin(self):
-        # global global_username
         username = self.lineEdit_3.text()
         password = self.lineEdit_4.text()
-        import global_vars
-        url = global_vars.getUrlLogin()
-
-        # 设置POST请求的数据
-        data = {
-            'username': username,
-            'password': password
-        }
-        reply = requests.post(url, data=data)
-        dic = reply.json()
-        if dic['code'] == 200:
+        from url_communication import isCorrectUser
+        ret = isCorrectUser(username, password)
+        if ret == True:
             # 切换到主界面
             import global_vars
             global_vars.setUsername(username)

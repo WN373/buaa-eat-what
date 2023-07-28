@@ -114,7 +114,6 @@ class AddBuyCard(CardWidget):
         self.detailPicker.addItems(['早餐', '午餐', '晚餐', '其他'])
         self.timeCard = CardWidget()
         self.timeCardInHor = QtWidgets.QHBoxLayout(self.timeCard)
-        # self.timeCardInHor.addWidget(self.timeIcon)
         self.timeCardInHor.addWidget(self.timeHint)
         self.timeCardInHor.addWidget(self.dayPicker)
         self.timeCardInHor.addStretch()

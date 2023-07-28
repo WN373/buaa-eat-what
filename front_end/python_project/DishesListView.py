@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QIcon, QFont
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QPlainTextEdit
+
+from qfluentwidgets import BodyLabel
 from home_interface import DishDetailWindow
 from qfluentwidgets import ScrollArea, TitleLabel, CaptionLabel, FluentIcon, PushButton, StrongBodyLabel, ToolButton, \
     TransparentToolButton, CardWidget, setThemeColor, CheckBox, PrimaryPushButton, InfoBar, InfoBarPosition, TextEdit, \
@@ -42,13 +44,19 @@ class MySearchLineEdit(LineEdit):
                 parent=self.parentWidget
             )
             return 0
-        # res = self.search(searchContent, self.searchRange)
         # TODO 根据搜索的内容show出新的dishesListView
         print('正在搜索嗷!!!')
 
 
 class DishesListView(CardWidget):
-    def __init__(self, windowTitle, iconTitle):
+    def __init__(self, windowTitle, iconTitle, listType=0, dishList=[]):
+        """
+        参数:
+        dishList: 要展示出来的菜对象
+        listType: 界面类型
+            == 1, 表示 查看某食堂某柜台的菜
+        """
+
         super().__init__()
         self.windowTitle = windowTitle
         self.iconTitle = iconTitle
@@ -77,10 +85,18 @@ class DishesListView(CardWidget):
         self.verWholeLayout.addSpacing(10)
         self.searchWindow = MySearchLineEdit([], self)
         self.horLayout1.addSpacing(60)
-
         self.tempVer = QtWidgets.QVBoxLayout()
         self.tempVer.addSpacing(30)
-        self.tempVer.addWidget(self.searchWindow, Qt.AlignVCenter)
+        if listType == 1:
+            self.tempHor = QtWidgets.QHBoxLayout()
+            self.tempHor.addWidget(self.searchWindow)
+            self.addButton = ToolButton()
+            self.addButton.setIcon(FluentIcon.ADD_TO)
+            self.tempHor.addWidget(self.addButton)
+            self.addButton.clicked.connect(self.clickAddButton)
+            self.tempVer.addLayout(self.tempHor, Qt.AlignVCenter)
+        else:
+            self.tempVer.addWidget(self.searchWindow, Qt.AlignVCenter)
         self.tempVer.addSpacing(10)
         self.horLayout1.addLayout(self.tempVer)
         self.horLayout1.addSpacing(60)
@@ -92,7 +108,6 @@ class DishesListView(CardWidget):
         self.horLayout2.addWidget(self.mainWidget)
         self.horLayout2.addSpacing(50)
         # 下面布置这个scrollView, 里面是一个垂直布局, 上面是grid, 下面是space
-        # self.verGridLayout = QtWidgets.QVBoxLayout(self.scrollView)
         self.mainGridLayout = QtWidgets.QGridLayout()
         self.mainWidget.setLayout(self.mainGridLayout)
         self.scrollArea = ScrollArea()
@@ -107,6 +122,88 @@ class DishesListView(CardWidget):
         self.realGridLayout.setSpacing(12)
         self.setFixedSize(670, 750)  # 设置固定的大小, 这样的话, 无法用鼠标改变它的大小
         self.setGrids()
+
+    class AddFoodWindow(CardWidget):  # 输入要添加的食堂名
+        class EditItem(CardWidget):
+            def __init__(self, labelName, hint):
+                super().__init__()
+                self.labelName = labelName
+                self.hint = hint
+
+                self.editLine = LineEdit()
+                self.editLine.setPlaceholderText(hint)
+
+                self.horEdit = QtWidgets.QHBoxLayout(self)
+                self.horEditLabel = BodyLabel()
+                self.horEditLabel.setText(str(labelName) + ': ')
+                self.horEdit.addSpacing(40)
+                self.horEdit.addWidget(self.horEditLabel)
+                self.horEdit.addWidget(self.editLine)
+                # self.horEdit.addSpacing(40)
+                self.setFixedWidth(330)
+
+        def __init__(self, parent=None):  # 此parent其实是parent的parent, 而不是ToolBar
+            super().__init__()
+            self.parentWidget = parent
+            self.setWindowTitle('添加菜品')
+            self.setWindowIcon(QIcon(':/images/logo.png'))
+            self.verMain = QtWidgets.QVBoxLayout(self)
+            self.verMain.addSpacing(30)
+            self.verMain.setContentsMargins(20, 0, 20, 0)
+            self.editName = self.EditItem('菜名', '在这里输入菜名')
+            self.editPrice = self.EditItem('价格', '在这里输入价格, 注意加单位')
+            self.editTags = self.EditItem('标签', '注意以逗号分隔')
+
+            self.verMain.addWidget(self.editName)
+            self.verMain.addWidget(self.editPrice)
+            self.verMain.addWidget(self.editTags)
+
+            self.verMain.addSpacing(10)
+
+            self.horButton = QtWidgets.QHBoxLayout()
+            self.button = PrimaryPushButton()
+            self.button.setText('点击添加')
+            self.horButton.addStretch()
+            self.horButton.addWidget(self.button)
+            self.horButton.addStretch()
+            self.verMain.addLayout(self.horButton)
+            self.verMain.addSpacing(25)
+            self.button.clicked.connect(self.clickButton)
+            self.resize(400, 250)
+
+        def clickButton(self):
+            text = self.editLine.text()
+            if text == '':
+                InfoBar.error(
+                    title='添加失败!',
+                    content='输入的内容不能为空',
+                    orient=Qt.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
+            else:
+                InfoBar.success(
+                    title='添加成功!',
+                    content='',
+                    orient=Qt.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self.parentWidget
+                )
+                # 数据库, 给食堂列表添加一个食堂  TODO
+                card = self.parentWidget.addCard(text, ['resource/images/find.png', 'resource/images/star_yes.png',
+                                                        'resource/images/delete.png'], self.parentWidget)
+                self.parentWidget.lst.append(card)
+                self.close()
+
+    def clickAddButton(self):
+        # 弹出一个窗口, 填添加菜品的信息
+        self.addInfoWindow = self.AddFoodWindow()
+        self.addInfoWindow.show()
+
 
     def setGrids(self):
         # TODO 这里访问数据库, 展示真正的 dishCard

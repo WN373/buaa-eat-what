@@ -44,20 +44,6 @@ class MainWindow(FluentWindow):
             parent=self
         )
 
+        from url_communication import addFood
+        addFood('豆浆', '0.5元/份', '甜口')
 
-
-        # 测试url
-        data = {
-            'food_name': '名称',
-            'price': '价格',
-            'tags': '酸甜 冰'
-        }
-        import global_vars
-        reply = requests.post(global_vars.getUrlCreateFood(), data=data)
-        print('url->' + global_vars.getUrlCreateFood())
-        dic = reply.json()
-        if dic['code'] == 200:
-            print('ok!')
-        else:
-            print('error! dic->')
-            print(dic)

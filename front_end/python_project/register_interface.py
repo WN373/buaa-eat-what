@@ -13,7 +13,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from main_interface import MainWindow
 # 数据库函数 =======================================
 
-
 def checkUsername(username: str) -> bool:
     # 检查长度是否满足要求
     if len(username) > 20:
@@ -25,30 +24,6 @@ def checkUsername(username: str) -> bool:
         return True
     else:
         return False
-def checkRegisterInfo(username, password) -> int:  # 检查用户名和是否合法以及用户名是否存在
-    # 0-> 信息完全合法
-    # 1-> 用户名格式错误
-    # 2-> 用户名格式正确, 但 用户名已存在
-    # 3-> 用户名完全合法, 但 密码格式错误
-    data = {
-        'username': username,
-        'password1': password,
-        'password2': password
-    }
-    # url = 'http://localhost:8000/login/register/'
-    import global_vars
-    url = global_vars.getUrlRegister()
-    print(2)
-    reply = requests.post(url, data=data)
-    dic = reply.json()
-    print(dic)
-    if dic['code'] == 200:
-        print('ok!')
-        return 0
-    else:
-        print('error! return is ' + str(dic['code']))
-        return 1
-
 
 def registerToDb(username: str, password: str):
     # 向数据库注册用户(此时的用户名和密码已经通过合法性检验, 直接存入数据库)
@@ -111,7 +86,6 @@ class Ui_Form_register(object):
         # 文本框
         self.username_edit = LineEdit(self.widget)
         self.username_edit.setClearButtonEnabled(True)
-        # self.username.setContentsMargins(20)
         self.username_edit.setPlaceholderText("请输入用户名")
         self.username_edit.setObjectName("username")
         self.verLayout.addWidget(self.username_edit)
@@ -125,7 +99,7 @@ class Ui_Form_register(object):
         # 文本框: 输入密码
         self.password_edit = LineEdit(self.widget)
         self.password_edit.setClearButtonEnabled(True)
-        self.password_edit.setPlaceholderText("请输入密码")
+        self.password_edit.setPlaceholderText("至少8个字符, 不可全为数字")
         self.password_edit.setEchoMode(QtWidgets.QLineEdit.Password)
         self.password_edit.setObjectName("password_edit")
         self.verLayout.addWidget(self.password_edit)
@@ -168,7 +142,6 @@ class RegisterWindow(AcrylicWindow, Ui_Form_register):
         self.label_logo.setScaledContents(True)  # 图片缩放内容属性
         self.setWindowTitle('Register')
         self.setWindowIcon(QIcon(":/images/logo.png"))
-        # self.resize(1000, 650)
 
         self.windowEffect.setMicaEffect(self.winId(), isDarkMode=False)
         self.setStyleSheet("RegisterWindow{background: rgba(242, 242, 242, 0.8)}")
@@ -195,8 +168,9 @@ class RegisterWindow(AcrylicWindow, Ui_Form_register):
         elif password2 == '':
             self.showErrorTip(self.password_edit2, "请确认密码")
         elif password1 == password2:
+            from url_communication import checkRegisterInfo
             ret = checkRegisterInfo(username, password2)
-            if ret == 0:  # 注册成功
+            if ret == '':  # 注册成功
                 registerToDb(username, password1)
                 self.stateTooltip = StateToolTip('', '', self)
                 self.stateTooltip.setContent('注册成功!')
@@ -204,12 +178,16 @@ class RegisterWindow(AcrylicWindow, Ui_Form_register):
                 self.stateTooltip.show()
                 self.parent.showSuccessRegister()
                 self.close()
-            elif ret == 1:
-                self.showErrorTip(self.username_edit, "用户名格式错误")
-            elif ret == 2:
-                self.showErrorTip(self.username_edit, "用户名已存在, 请重新输入")
-            elif ret == 3:
-                self.showErrorTip(self.register_button, "密码格式错误")
+            else:
+                InfoBar.error(
+                    title='注册失败',
+                    content=ret,
+                    orient=Qt.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.BOTTOM,
+                    duration=2000,
+                    parent=self
+                )
         elif password1 != password2:
             self.showErrorTip(self.register_button, "两次输入密码不一致, 请重新输入")
 

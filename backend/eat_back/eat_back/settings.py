@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-2p#7h=($la67firh__8$%!q_mcy31z*h%4*x2!2$q(4ot0bm51
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "food.apps.FoodConfig"
+    "login",
+    "food",
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -110,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "zh-hans"
 
-TIME_ZONE = "Asia/Shanghai"
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 

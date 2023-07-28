@@ -52,7 +52,7 @@ class MulClassShowCounter(ScrollArea):
 
         def clickButton0(self):
             # 查看菜品详情, 页面跳转
-            self.dishDetail = DishesListView('土豆', QIcon('resource/images/find.png'))
+            self.dishDetail = DishesListView('土豆', QIcon('resource/images/find.png'), listType=1)
             self.dishDetail.show()
 
         def clickButton1(self):
