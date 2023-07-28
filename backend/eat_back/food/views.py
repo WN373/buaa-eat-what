@@ -88,3 +88,23 @@ def post_new_comment(request):
         return JsonResponse({'code': 200, 'msg': '评论成功'})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+    
+    
+
+def buy_food(request):
+    if request.method == 'POST':
+        food_name = request.POST.get('food_name')
+        username = request.POST.get('username')
+        user = User.objects.filter(username=username)
+        food = FoodInfo.objects.filter(food_name=food_name)
+        if len(user) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到用户'})
+        if len(food) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到食物'})
+        else:
+            FoodPurchase.objects.create(food=food[0], user=user[0])
+            return JsonResponse({'code': 200, 'msg': food_name})
+    else:
+        return JsonResponse({'code': 400, 'msg': request.method})
+        
+        

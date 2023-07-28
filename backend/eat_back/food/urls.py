@@ -8,4 +8,5 @@ urlpatterns = [
     path('commenton/', post_new_comment, name='post_new_comment'),
     path('createfood/', create_food, name='create_food'),
     path('getfoodbyname/', get_food_by_name, name='get_food_by_name'),
+    path('buyfood/', buy_food, name='buy_food'),
 ]
