@@ -2,6 +2,7 @@
 
 import sys
 
+import requests
 from PyQt5.QtCore import Qt, QTranslator, QLocale, QUrl
 from PyQt5.QtGui import QIcon, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
@@ -42,3 +43,21 @@ class MainWindow(FluentWindow):
             duration=2000,
             parent=self
         )
+
+
+
+        # 测试url
+        data = {
+            'food_name': '名称',
+            'price': '价格',
+            'tags': '酸甜 冰'
+        }
+        import global_vars
+        reply = requests.post(global_vars.getUrlCreateFood(), data=data)
+        print('url->' + global_vars.getUrlCreateFood())
+        dic = reply.json()
+        if dic['code'] == 200:
+            print('ok!')
+        else:
+            print('error! dic->')
+            print(dic)

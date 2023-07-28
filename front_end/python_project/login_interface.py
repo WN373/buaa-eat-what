@@ -210,7 +210,8 @@ class LoginWindow(AcrylicWindow, Ui_Form_login):
         # global global_username
         username = self.lineEdit_3.text()
         password = self.lineEdit_4.text()
-        url = 'http://127.0.0.1:8000/login/login/'
+        import global_vars
+        url = global_vars.getUrlLogin()
 
         # 设置POST请求的数据
         data = {

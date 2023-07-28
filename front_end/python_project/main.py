@@ -11,12 +11,6 @@ from qfluentwidgets import setThemeColor, FluentTranslator, setTheme, Theme, Spl
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 from qfluentwidgets import PushButton
 
-# class testWindow(QWidget):
-#     def __init__(self):
-#         super().__init__()
-#         self.card = QFrame(self)
-#         self.card.setWindowTitle('123')
-
 if __name__ == '__main__':
     a = 0
     QApplication.setHighDpiScaleFactorRoundingPolicy(

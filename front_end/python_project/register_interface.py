@@ -30,14 +30,14 @@ def checkRegisterInfo(username, password) -> int:  # 检查用户名和是否合
     # 1-> 用户名格式错误
     # 2-> 用户名格式正确, 但 用户名已存在
     # 3-> 用户名完全合法, 但 密码格式错误
-    # if not checkUsername(username):
-    #     return 1
     data = {
         'username': username,
         'password1': password,
         'password2': password
     }
-    url = 'http://localhost:8000/login/register/'
+    # url = 'http://localhost:8000/login/register/'
+    import global_vars
+    url = global_vars.getUrlRegister()
     print(2)
     reply = requests.post(url, data=data)
     dic = reply.json()
@@ -57,7 +57,7 @@ def registerToDb(username: str, password: str):
 
 # 数据库函数 =======================================
 class Ui_Form_register(object):
-    def setupUi(self, Form): # 给Form设置ui界面
+    def setupUi(self, Form):  # 给Form设置ui界面
         Form.setObjectName("Form")
         Form.resize(496, 500)
         Form.setMinimumSize(QtCore.QSize(496, 500))  # 设定在调整窗口大小时的最小大小
@@ -152,7 +152,6 @@ class Ui_Form_register(object):
         self.register_button.setObjectName("register_button")
         self.register_button.setText("确认注册")
         self.verLayout.addWidget(self.register_button)
-
 
         QtCore.QMetaObject.connectSlotsByName(Form)
 
