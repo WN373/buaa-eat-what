@@ -12,4 +12,5 @@ class FoodInfoForm(forms.ModelForm):
             'tags': '标签',
             'photo_url': '图片地址'
         }
+        required = {'photo_url': False}
 
