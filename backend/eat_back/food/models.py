@@ -7,13 +7,13 @@ from taggit.managers import TaggableManager
 class FoodInfo(models.Model):
     id = models.AutoField(primary_key=True)
     food_name = models.CharField(max_length=128, verbose_name='菜品名', unique=True)
-    price = models.CharField(max_length=64, verbose_name='价格')
+    price = models.CharField(max_length=64, verbose_name='价格', default='0.0')
     tags = TaggableManager(blank=True, verbose_name='标签')
     comments = models.IntegerField(verbose_name='评论数', default=0)
     rating = models.FloatField(verbose_name='评分', default=0.0)
     stars = models.IntegerField(verbose_name='收藏量', default=0)
     purchases = models.IntegerField(verbose_name='购买量', default=0)
-    photo_url = models.CharField(max_length=256, verbose_name='图片地址', default='')
+    photo_url = models.CharField(max_length=256, verbose_name='图片地址', default='', blank=True)
     created = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 
