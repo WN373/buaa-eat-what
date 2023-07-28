@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
+
 # create_region
 # post:
 # {
@@ -24,6 +25,7 @@ def create_region(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 # get_regions
 # get:
 def get_regions(request):
@@ -33,11 +35,11 @@ def get_regions(request):
             data = [{
                 'id': region.id,
                 'region_name': region.region_name,
-                'created': region.created
+                'created': region.created,
             } for region in regions]
             return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
-        except:
-            return JsonResponse({'code': 400, 'msg': '获取失败'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
@@ -63,6 +65,7 @@ def create_counter(request):
             return JsonResponse({'code': 400, 'msg': '创建失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # get_counters_by_region
 # get:
@@ -135,6 +138,125 @@ def delete_food_favor(request):
             return JsonResponse({'code': 400, 'msg': '删除失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+# create_region_favor
+# post:
+# {
+#     'region_name': '地区名称',
+#     'username': '用户名',
+#     'manipulate': '操作类型', # add | delete
+# }
+# attention:
+#       删除成功时状态码为 201
+@csrf_exempt
+def modify_region_favor(request):
+    if request.method == 'POST':
+        try:
+            region_name = request.POST.get('region_name')
+            region = RegionInfo.objects.get(region_name=region_name)
+            username = request.POST.get('username')
+            user = User.objects.get(username=username)
+            if request.POST.get('manipulate') == 'add':
+                region_favor = RegionFavor(region=region, user=user)
+                region_favor.save()
+                return JsonResponse({'code': 200, 'msg': '创建成功'})
+            elif request.POST.get('manipulate') == 'delete':
+                region_favor = RegionFavor.objects.get(region=region, user=user)
+                region_favor.delete()
+                return JsonResponse({'code': 201, 'msg': '删除成功'})
+            else:
+                raise AttributeError('manipulate参数错误')
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '操作失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+# modify_counter_favor
+# post:
+# {
+#     'counter_name': '柜台名称',
+#     'region_name': '地区名称',
+#     'username': '用户名',
+#     'manipulate': '操作类型', # add | delete
+# }
+@csrf_exempt
+def modify_counter_favor(request):
+    if request.method == 'POST':
+        try:
+            region_name = request.POST.get('region_name')
+            region = RegionInfo.objects.get(region_name=region_name)
+            username = request.POST.get('username')
+            user = User.objects.get(username=username)
+            counter_name = request.POST.get('counter_name')
+            counter = CounterInfo.objects.get(counter_name=counter_name, region=region)
+            if request.POST.get('manipulate') == 'add':
+                counter_favor = CounterFavor(counter=counter, user=user)
+                counter_favor.save()
+                return JsonResponse({'code': 200, 'msg': '创建成功'})
+            elif request.POST.get('manipulate') == 'delete':
+                counter_favor = CounterFavor.objects.get(counter=counter, user=user)
+                counter_favor.delete()
+                return JsonResponse({'code': 201, 'msg': '删除成功'})
+            else:
+                raise AttributeError('manipulate参数错误')
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '操作失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+# get_region_favors
+# get:
+# {
+#    'username': '用户名',
+# }
+def get_region_favor(request):
+    if request.method == 'GET' :
+        try:
+            username = request.GET.get('username')
+            user = User.objects.get(username=username)
+            region_favors = RegionFavor.objects.filter(user=user).order_by('-created')
+            data = [{
+                'id': region_favor.id,
+                'region_name': region_favor.region.region_name,
+                'username': region_favor.user.username,
+                'created': region_favor.created
+            } for region_favor in region_favors]
+            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+# get_counter_favors
+# get:
+# {
+#     'region_name': '地区名称',
+#     'username': '用户名',
+# }
+def get_counter_favor(request):
+    if request.method == 'GET':
+        try:
+            username = request.GET.get('username')
+            user = User.objects.get(username=username)
+            region_name = request.GET.get('region_name')
+            region = RegionInfo.objects.get(region_name=region_name)
+            counter_favors = CounterFavor.objects.filter(user=user, counter__region=region).order_by('-created')
+            data = [{
+                'id': counter_favor.id,
+                'counter_name': counter_favor.counter.counter_name,
+                'username': counter_favor.user.username,
+                'created': counter_favor.created
+            } for counter_favor in counter_favors]
+            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # get_food_favor
 # get:
