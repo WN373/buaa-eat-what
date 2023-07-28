@@ -1,5 +1,5 @@
 from django import forms
-from .models import FoodInfo
+from .models import FoodInfo, FoodPurchase
 
 
 class FoodInfoForm(forms.ModelForm):
@@ -11,3 +11,4 @@ class FoodInfoForm(forms.ModelForm):
             'price': '价格',
             'tags': '标签'
         }
+

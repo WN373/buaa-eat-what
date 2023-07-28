@@ -6,6 +6,20 @@ from django.http import JsonResponse
 from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
+# create_food_favor
+# post:
+
+@csrf_exempt
+def create_food_favor(request):
+    if request.method == 'POST':
+        food_name = request.POST.get('food_name')
+        food = FoodInfo.objects.filter(food_name=food_name)
+        username = request.POST.get('username')
+        user = User.objects.filter(username=username)
+        food_favor = FoodFavor(food=food)
+        food_favor.save()
+        return JsonResponse({'code': 200, 'msg': '创建成功'})
+
 # create_food
 # post:
 # {
@@ -19,7 +33,10 @@ def create_food(request):
         form = FoodInfoForm(request.POST)
         if form.is_valid():
             form.save()
-            return JsonResponse({'code': 200, 'msg': '创建成功'})
+            try:
+                print(form.cleaned_data['id'])
+            finally:
+                return JsonResponse({'code': 200, 'msg': '创建成功'})
         else:
             return JsonResponse({'code': 400, 'msg': '创建失败(您的表单格式可能错误)', 'error': '???'})
     else:
@@ -48,6 +65,14 @@ def get_food_by_name(request):
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 
+@csrf_exempt
+def create_purchase(request):
+    if request.method == 'POST':
+        food_name = request.POST.get('food_name')
+        food = FoodInfo.objects.filter(food_name=food_name)
+        purchase = FoodPurchase(food=food)
+        purchase.save()
+        return JsonResponse({'code': 200, 'msg': '创建成功'})
 
 
 # get_food_list
@@ -71,20 +96,26 @@ def get_comment_list(request):
 #     'food_name': '事物名称',
 #     'replied': '回复对象',
 #     'comment': '评论内容',
-#     'username': '用户名'
+#     'username': '用户名',
+#     'is_anonymous': '是否匿名'
 # }
+@csrf_exempt
 def post_new_comment(request):
     if request.method == 'POST':
-        food_name = request.POST.get('food_name')
-        if request.GET.contains('replied'):
-            replied = request.POST.get('replied')
-        else:
-            replied = None
-        comment = request.POST.get('comment')
-        username = request.POST.get('username')
-        user = User.objects.filter(username=username)
-        food = FoodInfo.objects.filter(foodName=food_name)
-        FoodComments.objects.create(food=food, replied=replied, user=user, comment=comment)
-        return JsonResponse({'code': 200, 'msg': '评论成功'})
+        try:
+            food_name = request.POST.get('food_name')
+            if 'replied' in request.POST.keys():
+                replied_name = request.POST.get('replied')
+                replied = User.objects.get(username=replied_name).id
+            else:
+                replied = None
+            comment = request.POST.get('comment')
+            username = request.POST.get('username')
+            user = User.objects.get(username=username)
+            food = FoodInfo.objects.get(food_name=food_name)
+            FoodComments.objects.create(food_id=food.id, replied_id=replied, user_id=user.id, comment=comment)
+            return JsonResponse({'code': 200, 'msg': '评论成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '评论失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
