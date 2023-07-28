@@ -6,6 +6,87 @@ from django.http import JsonResponse
 from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
+# create_region
+# post:
+# {
+#     'region_name': '地区名称',
+# }
+@csrf_exempt
+def create_region(request):
+    if request.method == 'POST':
+        try:
+            region_name = request.POST.get('region_name')
+            region = RegionInfo(region_name=region_name)
+            region.save()
+            return JsonResponse({'code': 200, 'msg': '创建成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '创建失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+# get_regions
+# get:
+def get_regions(request):
+    if request.method == 'GET':
+        try:
+            regions = RegionInfo.objects.all()
+            data = [{
+                'id': region.id,
+                'region_name': region.region_name,
+                'created': region.created
+            } for region in regions]
+            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+        except:
+            return JsonResponse({'code': 400, 'msg': '获取失败'})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+# create_counter:
+# post:
+# {
+#     'counter_name': '柜台名称',
+#     'region_name': '地区名称',
+# }
+@csrf_exempt
+def create_counter(request):
+    if request.method == 'POST':
+        try:
+            counter_name = request.POST.get('counter_name')
+            region_name = request.POST.get('region_name')
+            region = RegionInfo.objects.get(region_name=region_name)
+            assert CounterInfo.objects.filter(counter_name=counter_name, region=region).exists() is False
+            counter = CounterInfo(counter_name=counter_name, region=region)
+            counter.save()
+            return JsonResponse({'code': 200, 'msg': '创建成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '创建失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+# get_counters_by_region
+# get:
+# {
+#     'region_name': '地区名称',
+# }
+def get_counters_by_region(requests):
+    if requests.method == 'GET':
+        try:
+            region_name = requests.GET.get('region_name')
+            region = RegionInfo.objects.get(region_name=region_name)
+            counters = CounterInfo.objects.filter(region=region)
+            data = [{
+                'id': counter.id,
+                'counter_name': counter.counter_name,
+                'created': counter.created
+            } for counter in counters]
+            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
 # create_food_favor
 # post:
 # {

@@ -16,6 +16,16 @@ class FoodInfo(models.Model):
     photo_url = models.CharField(max_length=256, verbose_name='图片地址', default='', blank=True)
     created = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
+class RegionInfo(models.Model):
+    id = models.AutoField(primary_key=True)
+    region_name = models.CharField(max_length=128, verbose_name='地区名', unique=True)
+    created = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+class CounterInfo(models.Model):
+    id = models.AutoField(primary_key=True)
+    counter_name = models.CharField(max_length=128, verbose_name='柜台名')
+    region = models.ForeignKey(RegionInfo, on_delete=models.CASCADE, verbose_name='地区')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 class FoodPurchase(models.Model):
     id = models.AutoField(primary_key=True)
@@ -24,20 +34,23 @@ class FoodPurchase(models.Model):
     rating = models.IntegerField(verbose_name='评分', default=0)
     created = models.DateTimeField(auto_now_add=True, verbose_name='购买时间')
 
-
 class FoodFavor(models.Model):
     id = models.AutoField(primary_key=True)
     food = models.ForeignKey(FoodInfo, on_delete=models.CASCADE, verbose_name='菜品')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
     created = models.DateTimeField(auto_now_add=True, verbose_name='收藏时间')
 
-
-class TagFavor(models.Model):
+class RegionFavor(models.Model):
     id = models.AutoField(primary_key=True)
-    food = models.ForeignKey(FoodInfo, on_delete=models.CASCADE, verbose_name='菜品')
-    tag = models.CharField(max_length=128, verbose_name='单标签')
+    region = models.ForeignKey(RegionInfo, on_delete=models.CASCADE, verbose_name='地区')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
     created = models.DateTimeField(auto_now_add=True, verbose_name='收藏时间')
 
+class CounterFavor(models.Model):
+    id = models.AutoField(primary_key=True)
+    counter = models.ForeignKey(CounterInfo, on_delete=models.CASCADE, verbose_name='柜台')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='收藏时间')
 
 class FoodComments(models.Model):
     id = models.AutoField(primary_key=True)

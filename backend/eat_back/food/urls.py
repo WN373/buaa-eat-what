@@ -11,4 +11,8 @@ urlpatterns = [
     path('favorfood/', create_food_favor, name='create_food_favor'),
     path('unfavorfood/', delete_food_favor, name='delete_food_favor'),
     path('getfoodfavor/', get_food_favor, name='get_food_favor'),
+    path('createregion/', create_region, name='create_region'),
+    path('getregions/', get_regions, name='get_region'),
+    path('createcounter/', create_counter, name='create_counter'),
+    path('getcounters/', get_counters_by_region(), name='get_counters'),
 ]
