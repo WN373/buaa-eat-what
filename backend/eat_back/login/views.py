@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, models
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -41,6 +41,26 @@ def register_view(request):
         form = UserCreationForm()
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+# modify_password
+# /login/modify/
+# post:
+# {
+#    'username': '用户名',
+#    'newpassword': '新密码'
+# }
+@csrf_exempt
+def modify_password(request):
+    if request.method == 'POST':
+        try:
+            username = request.POST.get('username')
+            user = models.User.objects.get(username=username)
+            password = request.POST.get('newpassword')
+            user.set_password(password)
+            return JsonResponse({'code': 200, 'msg': '修改成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '修改失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 def logout_view(request):
     logout(request)
