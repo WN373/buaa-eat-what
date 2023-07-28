@@ -41,6 +41,7 @@ def register_view(request):
         form = UserCreationForm()
     return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 # modify_password
 # /login/modify/
 # post:

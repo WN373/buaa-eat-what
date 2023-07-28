@@ -38,8 +38,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "login",
+<<<<<<< HEAD
     "food",
     'taggit',
+=======
+>>>>>>> 3f3f3bec35e3063e7a50dfe22545e7206c8c4c07
 ]
 
 MIDDLEWARE = [
@@ -110,9 +113,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "zh-hans"
+LANGUAGE_CODE = "en-us"
 
+<<<<<<< HEAD
 TIME_ZONE = 'Asia/Shanghai'
+=======
+TIME_ZONE = "UTC"
+>>>>>>> 3f3f3bec35e3063e7a50dfe22545e7206c8c4c07
 
 USE_I18N = True
 
