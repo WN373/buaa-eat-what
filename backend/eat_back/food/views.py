@@ -72,10 +72,10 @@ def create_counter(request):
 # {
 #     'region_name': '地区名称',
 # }
-def get_counters_by_region(requests):
-    if requests.method == 'GET':
+def get_counters_by_region(request):
+    if request.method == 'GET':
         try:
-            region_name = requests.GET.get('region_name')
+            region_name = request.GET.get('region_name')
             region = RegionInfo.objects.get(region_name=region_name)
             counters = CounterInfo.objects.filter(region=region)
             data = [{
