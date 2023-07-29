@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "login",
     "food",
-    "taggit"
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "zh-hans"
+LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = 'Asia/Shanghai'
 
