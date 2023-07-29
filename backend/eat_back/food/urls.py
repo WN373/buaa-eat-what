@@ -21,8 +21,10 @@ urlpatterns = [
     path('getfoodfavor/', get_food_favor, name='get_food_favor'),
     # region & counter favor
     path('createregion/', create_region, name='create_region'),
+    path('deleteregion/', delete_region, name='delete_region'),
     path('getregions/', get_regions, name='get_region'),
     path('createcounter/', create_counter, name='create_counter'),
+    path('deletecounter/', delete_counter, name='delete_counter'),
     path('getcounters/', get_counters_by_region, name='get_counter'),
     path('favorregion/', modify_region_favor, name='modify_region_favor'),
     path('favorcounter/', modify_counter_favor, name='modify_counter_favor'),
