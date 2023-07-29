@@ -63,6 +63,11 @@ def getUrlChangePurchaseHis():
     global url_pre
     return url_pre + 'food/changepurchasehistory/'
     
+def getUrlBuyFood():
+    
+    global url_pre
+    return url_pre + 'food/buyfood/'
+
 
 # ============================================= 相关函数
 
@@ -152,7 +157,17 @@ def getTopFood():
         return True
     else:
         return False
-    
+    def buyFood(foodName, username):
+    data = {
+        'food_name': foodName,
+        'username': username 
+    }
+    reply = requests.post(getUrlBuyFood(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
     
 def getPurchaseHistory(user_name):
     data = {
