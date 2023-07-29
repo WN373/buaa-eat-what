@@ -7,6 +7,8 @@ from taggit.managers import TaggableManager
 class FoodInfo(models.Model):
     id = models.AutoField(primary_key=True)
     food_name = models.CharField(max_length=128, verbose_name='菜品名', unique=True)
+    region = models.ForeignKey('RegionInfo', on_delete=models.CASCADE, verbose_name='地区')
+    counter = models.ForeignKey('CounterInfo', on_delete=models.CASCADE, verbose_name='柜台')
     price = models.CharField(max_length=64, verbose_name='价格', default='0.0')
     tags = TaggableManager(blank=True, verbose_name='标签')
     comments = models.IntegerField(verbose_name='评论数', default=0)

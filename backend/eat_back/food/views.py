@@ -285,6 +285,8 @@ def get_food_favor(request):
 # post:
 # {
 #     'food_name': '菜品名称',
+#     'region_name': '地区名称',
+#     'counter_name': '柜台名称',
 #     'price': '价格',
 #     'tags': '标签',
 #     'food_url': '图片地址',
@@ -315,10 +317,13 @@ def get_food_by_name(request):
             'id': food.id,
             'food_name': food.food_name,
             'price': food.price,
+            'region_name': food.region.region_name,
+            'counter_name': food.counter.counter_name,
             'tags': ', '.join(food.tags.values_list('name', flat=True)),
             'rating': food.rating,
             'stars': food.stars,
             'purchases': food.purchases,
+            'photo_url': food.photo_url,
             'created': food.created
         } for food in foods]
         print(data)
