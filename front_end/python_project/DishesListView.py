@@ -54,7 +54,8 @@ class DishesListView(CardWidget):
         参数:
         dishList: 要展示出来的菜对象
         listType: 界面类型
-            == 1, 表示 查看某食堂某柜台的菜
+            == 0, 表示 查看某食堂某柜台的菜, 中心图标也要换
+            == 1, 收藏
         """
 
         super().__init__()
@@ -69,16 +70,25 @@ class DishesListView(CardWidget):
         self.hor0 = QtWidgets.QHBoxLayout()
         self.hor0.addStretch()
         self.icon0 = IconWidget()
-        self.icon0.setIcon(QIcon('resource/images/heart.png'))
+        icon0Path = 'resource/images/heart.png'
+        if listType == 0:
+            icon0Path = 'resource/images/hall.png'
+        # elif listType == 2:
+        #     icon0Path = 'resource/images/idea.png'
+        self.icon0.setIcon(QIcon(icon0Path))
         self.icon0.setFixedSize(45, 45)
         self.hor0.addWidget(self.icon0)
         self.subTitle = SubtitleLabel()
-        self.subTitle.setText('我的收藏')
+        subTitleText = '我的收藏'
+        if listType == 0:
+            subTitleText = '菜品一览'
+        # elif listType == 2:
+        #     subTitleText = '推荐 top 10'
+        self.subTitle.setText(subTitleText)
         self.hor0.addWidget(self.subTitle)
         self.hor0.addStretch()
         self.verWholeLayout.addSpacing(15)
         self.verWholeLayout.addLayout(self.hor0)
-        # self.verWholeLayout.addSpacing(5)
         # 第一层: 一个水平布局, 主体为 搜索框: 把所有包含这几个字的都显示出来, 并且按照匹配度(简化为包含的字的个数)自高到低排序
         self.horLayout1 = QtWidgets.QHBoxLayout()
         self.verWholeLayout.addLayout(self.horLayout1)
@@ -87,7 +97,7 @@ class DishesListView(CardWidget):
         self.horLayout1.addSpacing(60)
         self.tempVer = QtWidgets.QVBoxLayout()
         self.tempVer.addSpacing(30)
-        if listType == 1:
+        if listType == 0:
             self.tempHor = QtWidgets.QHBoxLayout()
             self.tempHor.addWidget(self.searchWindow)
             self.addButton = ToolButton()
@@ -139,7 +149,6 @@ class DishesListView(CardWidget):
                 self.horEdit.addSpacing(40)
                 self.horEdit.addWidget(self.horEditLabel)
                 self.horEdit.addWidget(self.editLine)
-                # self.horEdit.addSpacing(40)
                 self.setFixedWidth(330)
 
         def __init__(self, parent=None):  # 此parent其实是parent的parent, 而不是ToolBar
@@ -172,11 +181,14 @@ class DishesListView(CardWidget):
             self.resize(400, 250)
 
         def clickButton(self):
-            text = self.editLine.text()
-            if text == '':
+            textName = self.editName.editLine.text()
+            textPrice = self.editPrice.editLine.text()
+            textTags = self.editTags.editLine.text()
+
+            if textName == '' or textPrice == '' or textTags == '':
                 InfoBar.error(
                     title='添加失败!',
-                    content='输入的内容不能为空',
+                    content='请保证编辑框输入的内容不为空',
                     orient=Qt.Horizontal,
                     isClosable=True,
                     position=InfoBarPosition.TOP,
@@ -194,14 +206,14 @@ class DishesListView(CardWidget):
                     parent=self.parentWidget
                 )
                 # 数据库, 给食堂列表添加一个食堂  TODO
-                card = self.parentWidget.addCard(text, ['resource/images/find.png', 'resource/images/star_yes.png',
-                                                        'resource/images/delete.png'], self.parentWidget)
-                self.parentWidget.lst.append(card)
+
+
+
                 self.close()
 
     def clickAddButton(self):
         # 弹出一个窗口, 填添加菜品的信息
-        self.addInfoWindow = self.AddFoodWindow()
+        self.addInfoWindow = self.AddFoodWindow(self)
         self.addInfoWindow.show()
 
 

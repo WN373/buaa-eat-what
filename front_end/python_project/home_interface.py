@@ -12,6 +12,7 @@ from qfluentwidgets import CardWidget, StrongBodyLabel, IconWidget, TransparentT
     InfoBar, InfoBarPosition, ScrollArea, TitleLabel, CaptionLabel
 
 
+
 class HomeWindow(QWidget):
     def __init__(self, parentWidget):
         super().__init__()
@@ -23,7 +24,7 @@ class HomeWindow(QWidget):
         self.setObjectName('homeWindow')
         self.initGridLayout()
         self.addMyStarGrid()
-        self.signalToSlot()
+        # self.signalToSlot()
         self.addRecCard()
         self.addTopShowCard()
         self.addBuyCard()
@@ -82,9 +83,13 @@ class HomeWindow(QWidget):
         self.myStarTitleLabel = StrongBodyLabel(self.myStarCard)
         self.myStarTitleLabel.setText('我的收藏')
         # 按钮 —— 查看更多
-        self.visitMoreStarButton = TransparentToolButton(self.myStarCard)
-        self.visitMoreStarButton.setObjectName('visitMoreButton')
-        self.visitMoreStarButton.setIcon(FluentIcon.MORE)
+        # self.visitMoreStarButton = TransparentToolButton(self.myStarCard)
+        # self.visitMoreStarButton.setObjectName('visitMoreButton')
+        # self.visitMoreStarButton.setIcon(FluentIcon.MORE)
+        # logo - heart2
+        self.heartLogo = IconWidget()
+        self.heartLogo.setIcon(QIcon('resource/images/heart2.png'))
+        self.heartLogo.setFixedSize(25, 25)
 
     def addStarComponentToLayout(self):
         # grid添加
@@ -94,15 +99,11 @@ class HomeWindow(QWidget):
         self.myStarHorLayout.addWidget(self.myStarTitleLabel)
         self.myStarHorLayout.addItem(
             QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
-        self.myStarHorLayout.addWidget(self.visitMoreStarButton)
+        self.myStarHorLayout.addWidget(self.heartLogo)
         # star 全局垂直
         self.myStarVerLayout.addLayout(self.myStarHorLayout)
         self.initShowItems()
 
-    def signalToSlot(self):
-        a = 1
-        # 将信号和槽链接起来
-        self.visitMoreStarButton.clicked.connect(self.clickVisitMoreStarButton)
 
     def clickAddStarDishButton(self):  # 不应该在这里点添加收藏
         # 应该弹出一个窗口, 添加收藏
@@ -120,9 +121,9 @@ class HomeWindow(QWidget):
         #     self.starShowItemList.append(StarShowItem('待添加', '', '', self.myStarCard, self))
         #     self.myStarVerLayout.addWidget(self.starShowItemList[i])
         # self.myStarVerLayout.addStretch()
-        self.starCard1 = SubStarCard('🏬 食堂收藏')
-        self.starCard2 = SubStarCard('🍱 柜台收藏')
-        self.starCard3 = SubStarCard('🍔 菜品收藏')
+        self.starCard1 = SubStarCard('🏬 食堂收藏', cardType=0)
+        self.starCard2 = SubStarCard('🍱 柜台收藏', cardType=1)
+        self.starCard3 = SubStarCard('🍔 菜品收藏', cardType=2)
         self.starShowVer = QtWidgets.QVBoxLayout()
         self.starShowVer.addSpacing(10)
         self.starShowVer.addWidget(self.starCard1)
@@ -153,9 +154,16 @@ class HomeWindow(QWidget):
 
 class SubStarCard(CardWidget):
     # 一个文字提示 + 一个查看详情的图标
-    def __init__(self, labelText: str):
+    def __init__(self, labelText: str, cardType=0):
+        """
+        cardType ->
+            0: 食堂
+            1: 柜台
+            2: 菜品
+        """
         super().__init__()
         self.labelText = labelText
+        self.cardType = cardType
         self.setContentsMargins(15, 0, 0, 0)
         self.horMain = QtWidgets.QHBoxLayout(self)
         self.hintLabel = BodyLabel()
@@ -171,90 +179,101 @@ class SubStarCard(CardWidget):
         self.setFixedWidth(210)
 
     def clickIconButton(self):
-        print('点击!')
+        from MulClassShow import MulClassShow
+        from MulClassShowCounter import MulClassShowCounter
+        if self.cardType == 0:  # 食堂收藏
+           self.hallStarWindow = MulClassShow([], '食堂收藏', '在这里可以看到您所有收藏的食堂的信息哦 ~', showType=1)
+           self.hallStarWindow.show()
+        elif self.cardType == 1:  # 柜台收藏
+            self.gridStarWindow = MulClassShowCounter([], '柜台收藏', '在这里可以看到您所有收藏的柜台的信息哦 ~', showType=1)
+            self.gridStarWindow.show()
+        elif self.cardType == 2:  # 菜品收藏
+            from DishesListView import DishesListView
+            self.starDishes = DishesListView('收藏菜品', QIcon('resource/images/star_yes.png'), listType=1)
+            self.starDishes.show()
 
-class StarShowItem(QWidget):
-    def __init__(self, dishName, dinnerLocation, price, parent, homeWindow):
-        super().__init__()
-        self.parentWidget = parent
-        self.homeWindow = homeWindow
-        self.horLayout = QtWidgets.QHBoxLayout(self)
-        if dinnerLocation == '':
-            self.isNull = True  # 现在是空的
-
-        self.lookStarDetailButton = TransparentToolButton()
-        self.lookStarDetailButton.setObjectName('lookStarDetailButton')
-        self.lookStarDetailButton.setIcon(FluentIcon.SEARCH)
-        self.horLayout.addWidget(self.lookStarDetailButton)
-
-        self.deleteStarDishButton = TransparentToolButton()
-        self.deleteStarDishButton.setObjectName('deleteStarDishButton')
-        self.deleteStarDishButton.setIcon(FluentIcon.DELETE)
-        self.horLayout.addWidget(self.deleteStarDishButton)
-
-        self.dishNameLabel = BodyLabel()
-        self.dishNameLabel.setText(dishName)
-        self.priceLabel = BodyLabel()
-        self.priceLabel.setText(price)
-        self.dinnerLocationLabel = BodyLabel()
-        self.dinnerLocationLabel.setText(dinnerLocation)
-        self.horLayout.addWidget(self.dishNameLabel)
-        self.horLayout.addWidget(self.dinnerLocationLabel)
-        self.horLayout.addWidget(self.priceLabel)
-
-        self.deleteStarDishButton.clicked.connect(self.clickDelete)
-        self.lookStarDetailButton.clicked.connect(self.clickSearch)
-        self.setFixedHeight(40)
-
-    def deleteSelf(self):
-        self.reset('待添加', '', '')
-        self.isNull = True
-
-    def reset(self, dishName, dinnerLocation, price):
-        self.dishNameLabel.setText(dishName)
-        self.dinnerLocationLabel.setText(dinnerLocation)
-        self.priceLabel.setText(price)
-        self.isNull = False
-
-    def clickDelete(self):
-        if self.isNull:
-            InfoBar.info(
-                title='无法删除尚未添加的内容哦',
-                content='',
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=2000,
-                parent=self.parentWidget
-            )
-        else:
-            InfoBar.info(
-                title='成功删除',
-                content=self.dishNameLabel.text(),
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=2000,
-                parent=self.parentWidget
-            )
-            self.deleteSelf()
-
-    def clickSearch(self):
-        if self.isNull:  # 是空的话, 弹窗提示无法查看
-            InfoBar.info(
-                title='无法查看尚未添加的内容哦',
-                content='',
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=2000,
-                parent=self.parentWidget
-            )
-            self.homeWindow.starShowItemList[1].reset('土豆炖鲸鱼🐋', '学二食堂', '0.5元 / 份')
-        else:
-            # 打开某道菜品的详情界面
-            self.testWindow = DishDetailWindow()
-            self.testWindow.show()
+# class StarShowItem(QWidget):
+#     def __init__(self, dishName, dinnerLocation, price, parent, homeWindow):
+#         super().__init__()
+#         self.parentWidget = parent
+#         self.homeWindow = homeWindow
+#         self.horLayout = QtWidgets.QHBoxLayout(self)
+#         if dinnerLocation == '':
+#             self.isNull = True  # 现在是空的
+#
+#         self.lookStarDetailButton = TransparentToolButton()
+#         self.lookStarDetailButton.setObjectName('lookStarDetailButton')
+#         self.lookStarDetailButton.setIcon(FluentIcon.SEARCH)
+#         self.horLayout.addWidget(self.lookStarDetailButton)
+#
+#         self.deleteStarDishButton = TransparentToolButton()
+#         self.deleteStarDishButton.setObjectName('deleteStarDishButton')
+#         self.deleteStarDishButton.setIcon(FluentIcon.DELETE)
+#         self.horLayout.addWidget(self.deleteStarDishButton)
+#
+#         self.dishNameLabel = BodyLabel()
+#         self.dishNameLabel.setText(dishName)
+#         self.priceLabel = BodyLabel()
+#         self.priceLabel.setText(price)
+#         self.dinnerLocationLabel = BodyLabel()
+#         self.dinnerLocationLabel.setText(dinnerLocation)
+#         self.horLayout.addWidget(self.dishNameLabel)
+#         self.horLayout.addWidget(self.dinnerLocationLabel)
+#         self.horLayout.addWidget(self.priceLabel)
+#
+#         self.deleteStarDishButton.clicked.connect(self.clickDelete)
+#         self.lookStarDetailButton.clicked.connect(self.clickSearch)
+#         self.setFixedHeight(40)
+#
+#     def deleteSelf(self):
+#         self.reset('待添加', '', '')
+#         self.isNull = True
+#
+#     def reset(self, dishName, dinnerLocation, price):
+#         self.dishNameLabel.setText(dishName)
+#         self.dinnerLocationLabel.setText(dinnerLocation)
+#         self.priceLabel.setText(price)
+#         self.isNull = False
+#
+#     def clickDelete(self):
+#         if self.isNull:
+#             InfoBar.info(
+#                 title='无法删除尚未添加的内容哦',
+#                 content='',
+#                 orient=Qt.Horizontal,
+#                 isClosable=True,
+#                 position=InfoBarPosition.TOP,
+#                 duration=2000,
+#                 parent=self.parentWidget
+#             )
+#         else:
+#             InfoBar.info(
+#                 title='成功删除',
+#                 content=self.dishNameLabel.text(),
+#                 orient=Qt.Horizontal,
+#                 isClosable=True,
+#                 position=InfoBarPosition.TOP,
+#                 duration=2000,
+#                 parent=self.parentWidget
+#             )
+#             self.deleteSelf()
+#
+#     def clickSearch(self):
+#         if self.isNull:  # 是空的话, 弹窗提示无法查看
+#             InfoBar.info(
+#                 title='无法查看尚未添加的内容哦',
+#                 content='',
+#                 orient=Qt.Horizontal,
+#                 isClosable=True,
+#                 position=InfoBarPosition.TOP,
+#                 duration=2000,
+#                 parent=self.parentWidget
+#             )
+#             self.homeWindow.starShowItemList[1].reset('土豆炖鲸鱼🐋', '学二食堂', '0.5元 / 份')
+#         else:
+#             # 打开某道菜品的详情界面
+#             self.testWindow = DishDetailWindow()
+#             self.testWindow.show()
 
 
 class DishDetailWindow(CardWidget):  # 该窗口类用于展示一道菜品的详细信息, 包括评论等

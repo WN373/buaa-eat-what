@@ -21,8 +21,13 @@ import global_vars
 
 class MulClassShow(ScrollArea):
     class ShowItem(CardWidget):
-        def __init__(self, labelName, iconAddrList: list, parent):
+        def __init__(self, labelName, iconAddrList: list, parent, parentShowType=0):
+            """
+            parentShowType:
+                1-> 个人收藏食堂一览, 需要不加星星, 通过删除来取消收藏
+            """
             super().__init__()
+            self.parentShowType = parentShowType
             self.horMain = QtWidgets.QHBoxLayout(self)
             self.parentWidget = parent
             # labelName
@@ -43,7 +48,8 @@ class MulClassShow(ScrollArea):
             self.horMain.addWidget(self.cardNameLabel)
             self.horMain.addStretch()
             self.horMain.addWidget(self.button0)
-            self.horMain.addWidget(self.button1)
+            if self.parentShowType != 1:
+                self.horMain.addWidget(self.button1)
             self.horMain.addWidget(self.button2)
             self.horMain.addSpacing(20)
 
@@ -54,7 +60,7 @@ class MulClassShow(ScrollArea):
         def clickButton0(self):
             # 查看, 页面跳转
             # self.close()
-            self.nextInter = MulClassShowCounter([], self.labelName + '柜台一览', '这里可以看到' + self.labelName + '的相关柜台哦 ~', self.labelName)
+            self.nextInter = MulClassShowCounter([], self.labelName + '柜台一览', '这里可以看到' + self.labelName + '的相关柜台哦 ~', self.labelName, showType=self.parentShowType)
             self.nextInter.show()
             print('0')
 
@@ -65,8 +71,11 @@ class MulClassShow(ScrollArea):
 
         def clickButton2(self):
             # 删除, 出来弹窗问是否确定
-            print('try to delete!')
-            title = '删除确认'
+            title = ''
+            if self.parentShowType == 0:
+                title = '删除确认'
+            elif self.parentShowType == 1:
+                title = '取消收藏确认'
             content = '一旦您删除此项, 其将不再出现在列表中。 您确定要删除 \"' + self.labelName + '\" 项吗 ?'
             print(self.labelName)
             messageBox = MessageBox(title, content, self.parentWidget)
@@ -84,10 +93,16 @@ class MulClassShow(ScrollArea):
                     parent=self.parentWidget
                 )
 
-    def __init__(self, restList: list, title, subtitle, parent):  # restList 待展示的食堂列表
+    def __init__(self, restList: list, title, subtitle, parent=None, showType=0):  # restList 待展示的食堂列表
+        """
+        showType 展现的窗口类型
+            == 0: 所有食堂一览
+            == 1: 个人收藏食堂一览
+        """
         super().__init__()
         self.view = QWidget(self)
         self.setParent(parent)
+        self.showType = showType
         self.title = title
         self.subtitle = subtitle
         self.toolBar = ToolBar(self.title, self.subtitle, self)
@@ -109,6 +124,10 @@ class MulClassShow(ScrollArea):
             }
         """)
 
+        if self.showType == 1:
+            self.setFixedSize(850, 700)
+            self.setWindowTitle('收藏食堂信息')
+            self.setWindowIcon(QIcon('resource/images/idea.png'))
 
         self.lst = []
         self.lst.append(self.addCard('学二', ['resource/images/find.png', 'resource/images/star_yes.png', 'resource/images/delete.png'], self))
@@ -120,7 +139,7 @@ class MulClassShow(ScrollArea):
         # self.lst = ['学二', '新北一层', '合一三层', '美食苑', '新北地下', '合一四层']
 
     def addCard(self, labelName, iconAddrList, parent):
-        card = self.ShowItem(labelName, iconAddrList, parent)
+        card = self.ShowItem(labelName, iconAddrList, parent, self.showType)
         self.vBoxLayout.addWidget(card, 0, Qt.AlignTop)
         # self.lst.append(card)
         return card
@@ -206,16 +225,17 @@ class ToolBar(QWidget):
         self.vBoxLayout.addSpacing(4)
         self.vBoxLayout.addWidget(self.subtitleLabel)
         self.vBoxLayout.addSpacing(4)
-        self.buttonLayout = QtWidgets.QHBoxLayout()
-        self.horWid = QWidget()
-        self.horWid.setLayout(self.buttonLayout)
-        self.horWid.setFixedWidth(parent.width())
-        self.horWid.setFixedWidth(780)
-        self.vBoxLayout.addWidget(self.horWid)
-        self.buttonLayout.addStretch()
-        self.addButton = ToolButton(FluentIcon.ADD, self)
-        self.buttonLayout.addWidget(self.addButton)
-        self.addButton.clicked.connect(self.clickAddButton)
+        if self.parentWidget.showType == 0:
+            self.buttonLayout = QtWidgets.QHBoxLayout()
+            self.horWid = QWidget()
+            self.horWid.setLayout(self.buttonLayout)
+            self.horWid.setFixedWidth(parent.width())
+            self.horWid.setFixedWidth(780)
+            self.vBoxLayout.addWidget(self.horWid)
+            self.buttonLayout.addStretch()
+            self.addButton = ToolButton(FluentIcon.ADD, self)
+            self.buttonLayout.addWidget(self.addButton)
+            self.addButton.clicked.connect(self.clickAddButton)
 
     def clickAddButton(self):
         self.addWidget = self.EditWindow(self.parentWidget)

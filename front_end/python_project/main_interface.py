@@ -34,9 +34,10 @@ class MainWindow(FluentWindow):
         self.setWindowTitle('wuhu!!!!!!')
         self.setWindowIcon(QIcon(":/images/logo.png"))
 
+        from global_vars import username_global
         InfoBar.success(
             title='欢迎回来!',
-            content='宁然',
+            content=username_global,
             orient=Qt.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
@@ -44,6 +45,6 @@ class MainWindow(FluentWindow):
             parent=self
         )
 
-        from url_communication import addFood
-        addFood('豆浆', '0.5元/份', '甜口')
+        # from url_communication import addFood
+        # addFood('胸口碎大石', '0.5元/份', '甜口')
 

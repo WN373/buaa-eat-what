@@ -209,16 +209,28 @@ class showTop15Window(CardWidget):
     # def __init__(self, lst):  # lst里面取前15道菜即可
     def __init__(self, mode):
         super().__init__()
-        self.mode = mode  # 0->top15展示  1->购买记录展示
+        self.mode = mode  # -1->推荐top10展示 0->top15展示  1->购买记录展示
         self.buildHorTitle()
         self.verMain = QtWidgets.QVBoxLayout(self)
         self.verMain.addSpacing(20)
         self.verMain.addLayout(self.horTitle)
+
         self.verMain.addSpacing(15)
-        self.setWindowTitle('必吃 TOP 15')
-        self.setWindowIcon(QIcon('resource/images/hot.png'))
+        titleText = ''
+        iconPath = ''
+        if self.mode == 0:
+            titleText = '必吃 TOP 15'
+            iconPath = 'resource/images/hot.png'
+        elif self.mode == 1:
+            titleText = '购买记录'
+            iconPath = 'resource/images/record.png'
+        elif self.mode == -1:
+            titleText = '推荐 top 10'
+            iconPath = 'resource/images/recommend.png'
+        self.setWindowTitle(titleText)
+        self.setWindowIcon(QIcon(iconPath))
         self.horMain = QtWidgets.QHBoxLayout()
-        self.verMain.addLayout(self.horMain)
+
         self.horMain.addSpacing(20)
         self.ver1 = QtWidgets.QVBoxLayout()
         self.ver1.addSpacing(53)
@@ -237,7 +249,7 @@ class showTop15Window(CardWidget):
         self.ver1.addSpacing(13)
         self.ver1.addWidget(self.icon3)
         self.ver1.addStretch()
-        if self.mode == 0:  # == 0的话才是展示top模式, 才需要加牌子
+        if self.mode == 0 or self.mode == -1:  # == 0/-1的话才是展示top模式, 才需要加牌子
             self.horMain.addLayout(self.ver1)
         else:
             self.horMain.addSpacing(24)
@@ -247,8 +259,7 @@ class showTop15Window(CardWidget):
         self.tableView.setColumnCount(6)
         self.dishList = []
         for i in range(15):
-            self.dishList.append([str(i + 1), '土豆炖鲸鱼', '学二一层', '12', '13', '0.5元/碗'])
-
+            self.dishList.append([str(i + 1), '土' + str(i + 1), '学二一层', '12', '13', '0.5元/碗'])
         for i, entry in enumerate(self.dishList):
             for j in range(6):
                 tempItem = QTableWidgetItem(entry[j])
@@ -261,23 +272,139 @@ class showTop15Window(CardWidget):
                         tempItem.setForeground(QColor(255, 131, 44))
                 self.tableView.setItem(i, j, tempItem)
         self.tableView.verticalHeader().hide()
-        self.tableView.setHorizontalHeaderLabels(
-            ['序号', '菜名', '售卖点', '购买量', '收藏量', '价格'])
-        # self.tableView.resizeColumnsToContents()
+        if self.mode != 1:
+            self.tableView.setHorizontalHeaderLabels(
+                ['序号', '菜名', '售卖点', '购买量', '收藏量', '价格'])
+        else:
+            self.tableView.setHorizontalHeaderLabels(
+                ['序号', '菜名', 'id 号', '购买日期', '餐点', '购买打分'])
+
         self.setStyleSheet("showTop20Window{background: rgb(249, 249, 249)} ")
+
+        self.buildVerDelete()
+        self.verMain.addLayout(self.verDelete)
+        self.verMain.addLayout(self.horMain)
+
         self.horMain.setContentsMargins(0, 0, 0, 0)
         self.horMain.addWidget(self.tableView)
         self.setFixedSize(720, 780)
+        # self.buildVerDelete()
+        # self.horMain.addLayout(self.verDelete)
+
+    def closeEvent(self, event):
+        finalList = []
+        if self.mode == 1:
+            l = len(self.dishList)
+            for i in range(l):
+                tempList = []
+                for j in range(6):
+                    if j != 0:
+                        tempList.append(self.tableView.item(i, j).text())
+                finalList.append(tempList)
+            # 把finalList存进数据库, finalList[x][1] 是id号
+            for e in finalList:
+                print(e)
+            # TODO
+        event.accept()
+
 
     def buildHorTitle(self):
         self.horTitle = QtWidgets.QHBoxLayout()
         self.horTitle.addStretch()
         self.iconCup = IconWidget()
-        self.iconCup.setIcon(QIcon('resource/images/praise_cup.png'))
+        titleText = ''
+        iconPath = ''
+        if self.mode == 0:
+            titleText = '必吃 TOP 15'
+            iconPath = 'resource/images/praise_cup.png'
+        elif self.mode == 1:
+            titleText = '购买记录'
+            iconPath = 'resource/images/buycar.png'
+        elif self.mode == -1:
+            titleText = '推荐 top 10'
+            iconPath = 'resource/images/idea.png'
+        self.iconCup.setIcon(QIcon(iconPath))
         self.iconCup.setFixedSize(45, 45)
         self.horTitle.addWidget(self.iconCup)
         self.subTitle = SubtitleLabel()
-        self.subTitle.setText('必吃 TOP 15')
+        self.subTitle.setText(titleText)
         self.horTitle.addWidget(self.subTitle)
         self.horTitle.addStretch()
 
+    def buildVerDelete(self):
+        self.verDelete = QtWidgets.QVBoxLayout()
+        self.verDelete.addWidget(DeleteBuyItem(self))
+
+    def showList(self, dishList):
+        for i, entry in enumerate(dishList):
+            for j in range(6):
+                tempItem = QTableWidgetItem(entry[j])
+                # showJ0 = tempItem
+                if j == 1:
+                    tempItem.setForeground(QColor(84, 150, 205))
+                if j == 0:
+                    # showJ0 = str(i + 1)
+                    tempItem.setText(str(i + 1))
+                    if i < 3:
+                        tempItem.setForeground(QColor(241, 111, 133))
+                    else:
+                        tempItem.setForeground(QColor(255, 131, 44))
+                self.tableView.setItem(i, j, tempItem)
+        self.nowTableToList()
+
+    def nowTableToList(self):  # 把当前表格的内容复制给list
+        self.dishList.clear()
+        for i in range(self.tableView.rowCount()):
+            temp = []
+            for j in range(self.tableView.columnCount()):
+                temp.append(self.tableView.item(i, j).text())
+            self.dishList.append(temp)
+
+
+class DeleteBuyItem(QWidget):  # 只有一个删除图标
+    def __init__(self, parent):
+        super().__init__()
+        self.parentObj = parent
+        self.hor = QtWidgets.QHBoxLayout(self)
+
+        self.explainLabel = BodyLabel(self)
+        self.explainLabel.setProperty("lightColor", QtGui.QColor(96, 96, 96))
+        self.explainLabel.setProperty("darkColor", QtGui.QColor(206, 206, 206))
+        self.explainLabel.setText('关闭窗口后会自动保存修改, 但是不允许对id修改哦 ~')
+
+        self.edit = LineEdit()
+        self.edit.setPlaceholderText('输入要删除的记录序号')
+
+        self.button = TransparentToolButton()
+        self.button.setIcon(QIcon('resource/images/delete.png'))
+
+        self.hor.addSpacing(36)
+        self.hor.addWidget(self.explainLabel)
+        self.hor.addSpacing(40)
+        self.hor.addWidget(self.edit)
+        self.hor.addWidget(self.button)
+
+        self.button.clicked.connect(self.clickDeleteButton)
+
+    def clickDeleteButton(self):
+        # 保证序号 - 1, 等于 dishList下标
+        newList = []
+        deleteNumber = self.edit.text()
+        maxNumber = len(self.parentObj.dishList)
+        if not deleteNumber.isdigit() or int(deleteNumber) > maxNumber:
+            InfoBar.error(
+                title='删除失败!',
+                content='请给出合法且存在的记录序号',
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=2000,
+                parent=self.parentObj
+            )
+            return 0
+
+        for i, e in enumerate(self.parentObj.dishList):
+            if i != int(deleteNumber) - 1:
+                newList.append(e)
+        self.parentObj.tableView.setRowCount(self.parentObj.tableView.rowCount() - 1)
+        self.parentObj.showList(newList)

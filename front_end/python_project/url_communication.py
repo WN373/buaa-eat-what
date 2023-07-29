@@ -41,6 +41,10 @@ def getUrlGetFoodByName():
     return url_pre + 'food/getfoodbyname/'
 
 
+def getUrlModifyPassword():
+    global url_pre
+    return url_pre + 'login/modify/'
+
 # ============================================= 相关函数
 
 def isCorrectUser(username: str, password: str) -> bool:  # 判断一对用户名密码是否正确
@@ -105,4 +109,14 @@ def addFood(foodName, price, tags):
         return False
 
 
-
+def modifyPassword(username, password):
+    data = {
+        'username': username,
+        'password': password
+    }
+    reply = requests.post(getUrlModifyPassword(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False

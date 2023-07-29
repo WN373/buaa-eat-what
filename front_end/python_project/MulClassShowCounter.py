@@ -42,7 +42,8 @@ class MulClassShowCounter(ScrollArea):
             self.horMain.addWidget(self.cardNameLabel)
             self.horMain.addStretch()
             self.horMain.addWidget(self.button0)
-            self.horMain.addWidget(self.button1)
+            if self.parentWidget.showType != 1:
+                self.horMain.addWidget(self.button1)
             self.horMain.addWidget(self.button2)
             self.horMain.addSpacing(20)
 
@@ -52,7 +53,15 @@ class MulClassShowCounter(ScrollArea):
 
         def clickButton0(self):
             # 查看菜品详情, 页面跳转
-            self.dishDetail = DishesListView('土豆', QIcon('resource/images/find.png'), listType=1)
+            title = ''
+            iconPath = ''
+            if self.parentWidget.showType == 1:
+                title = '收藏菜品'
+                iconPath = 'resource/images/star_yes.png'
+            elif self.parentWidget.showType == 0:
+                title = self.parentWidget.parentHallName + ' ' + self.labelName + ' 菜品一览'
+                iconPath = 'resource/images/find.png'
+            self.dishDetail = DishesListView(title, QIcon(iconPath), listType=self.parentWidget.showType)
             self.dishDetail.show()
 
         def clickButton1(self):
@@ -80,12 +89,18 @@ class MulClassShowCounter(ScrollArea):
                     parent=self.parentWidget
                 )
 
-    def __init__(self, restList: list, title, subtitle, parentHallName):  # restList 待展示的食堂列表
+    def __init__(self, restList: list, title, subtitle, parentHallName=None, showType=0):  # restList 待展示的食堂列表
+        """
+        showType:
+            0-> 展览
+            1-> 收藏
+        """
         super().__init__()
         self.view = QWidget(self)
         # self.setParent(parent)
         self.parentHallName = parentHallName
         self.title = title
+        self.showType = showType
         self.subtitle = subtitle
         self.toolBar = ToolBar(self.title, self.subtitle, self)
         self.vBoxLayout = QVBoxLayout(self.view)
@@ -107,10 +122,6 @@ class MulClassShowCounter(ScrollArea):
         """)
 
         self.lst = []
-        # self.addCard('学二二层', ['resource/images/find.png', 'resource/images/star_yes.png', 'resource/images/delete.png'], self)
-        # self.addCard('学二一层', ['resource/images/find.png', 'resource/images/star_yes.png', 'resource/images/delete.png'], self)
-        # self.addCard('合一三层东', ['resource/images/find.png', 'resource/images/star_yes.png', 'resource/images/delete.png'], self)
-        # self.addCard('合一三层西', ['resource/images/find.png', 'resource/images/star_yes.png', 'resource/images/delete.png'], self)
         self.lst.append(self.addCard('学二', ['resource/images/find.png', 'resource/images/star_yes.png',
                                               'resource/images/delete.png'], self))
         self.lst.append(self.addCard('新北一层', ['resource/images/find.png', 'resource/images/star_yes.png',
@@ -123,7 +134,11 @@ class MulClassShowCounter(ScrollArea):
                                                   'resource/images/delete.png'], self))
         self.lst.append(self.addCard('合一四层', ['resource/images/find.png', 'resource/images/star_yes.png',
                                                   'resource/images/delete.png'], self))
-        self.setWindowTitle(self.parentHallName + '柜台一览')
+
+        if self.showType == 0:
+            self.setWindowTitle(self.parentHallName + '柜台一览')
+        elif self.showType == 1:
+            self.setWindowTitle('柜台收藏')
         self.setWindowIcon(QIcon(':/images/logo.png'))
         self.setFixedSize(850, 700)
 

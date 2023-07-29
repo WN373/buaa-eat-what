@@ -15,18 +15,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from main_interface import MainWindow
 from register_interface import RegisterWindow
 
-
-# 数据库函数 =======================================
-def isCorrectUser(username: str, password: str) -> bool:  # 判断一对用户名密码是否正确
-    a = 1  # TODO  可以在数据库文件里声明一个这样的函数, 我直接导入
-    return True
-
-
-
-
-# 数据库函数 =======================================
-
-
 class Ui_Form_login(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")

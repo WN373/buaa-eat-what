@@ -120,5 +120,7 @@ class RecommendCard(CardWidget):
         preferenceContent = self.lineEdit.text()
         eatTime = self.selectBox.text()
         from DishesListView import DishesListView
-        self.recInterface = DishesListView('推荐生成', QIcon(':/images/logo.png'))  # 需要传进去参数, 根据具体的参数生成具体的listView
+        # self.recInterface = DishesListView('推荐生成', QIcon(':/images/logo.png'), listType=2)  # 需要传进去参数, 根据具体的参数生成具体的listView
+        from TopShowCard import showTop15Window
+        self.recInterface = showTop15Window(-1)
         self.recInterface.show()
