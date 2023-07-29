@@ -40,6 +40,11 @@ def getUrlGetFoodByName():
     global url_pre
     return url_pre + 'food/getfoodbyname/'
 
+def getUrlBuyFood():
+    
+    global url_pre
+    return url_pre + 'food/buyfood/'
+
 
 # ============================================= 相关函数
 
@@ -104,5 +109,15 @@ def addFood(foodName, price, tags):
     else:
         return False
 
-
+def buyFood(foodName, username):
+    data = {
+        'food_name': foodName,
+        'username': username 
+    }
+    reply = requests.post(getUrlBuyFood(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
 
