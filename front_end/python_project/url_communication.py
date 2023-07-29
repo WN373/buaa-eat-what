@@ -40,6 +40,29 @@ def getUrlGetFoodByName():
     global url_pre
     return url_pre + 'food/getfoodbyname/'
 
+def getUrlBuyFood():
+    global url_pre
+    return url_pre + 'food/buyfood'
+
+def getUrlTopFood():
+    global url_pre
+    return url_pre + 'food/gettopfood/'
+
+
+def getUrlPurchaseHistory():
+    global url_pre
+    return url_pre + 'food/getpurchasehistory/'
+
+def getUrlDeletePurchaseHis():
+    global url_pre
+    return url_pre + 'food/deletepurchasehistory/'
+
+
+    
+def getUrlChangePurchaseHis():
+    global url_pre
+    return url_pre + 'food/changepurchasehistory/'
+    
 
 # ============================================= 相关函数
 
@@ -91,11 +114,14 @@ def getFoodByName(foodName: str):  # 失败返回None
         return None
 
 
-def addFood(foodName, price, tags):
+def addFood(foodName, region_name, counter_name, price, tags, food_url):
     data = {
         'food_name': foodName,
+        'region_name': region_name,
+        'counter_name': counter_name,
         'price': price,
-        'tags': tags
+        'tags': tags,
+        'food_url': food_url
     }
     reply = requests.post(getUrlCreateFood(), data=data)
     dic = reply.json()
@@ -103,6 +129,64 @@ def addFood(foodName, price, tags):
         return True
     else:
         return False
+    
+def buyFood(foodName, user_name, rate=0.0, date='', time=''):
+    data = {
+        'food_name': foodName,
+        'user_name': user_name,
+        'rate': rate,
+        'date': date,
+        'time': time
+    }
+    reply = requests.post(getUrlBuyFood(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
+    
+def getTopFood():
+    reply = requests.get(getUrlTopFood)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
+    
+    
+def getPurchaseHistory(user_name):
+    data = {
+        'user_name': user_name
+    }
+    reply = requests.post(getUrlPurchaseHistory(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
+    
 
-
-
+def deletePurchaseHistory(user_name, id):
+    data = {
+        'user_name': user_name,
+        'id': id
+    }
+    reply = requests.post(getUrlDeletePurchaseHis(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
+    
+def changePurchaseHistory(user_name, id, newHis):
+    data = {
+        'user_name': user_name,
+        'id': id,
+        'newHis': newHis
+    }
+    reply = requests.post(getUrlChangePurchaseHis(), data=data)
+    dic = reply.json()
+    if dic['code'] == 200:
+        return True
+    else:
+        return False
