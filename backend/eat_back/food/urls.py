@@ -11,6 +11,10 @@ urlpatterns = [
     # food info
     path('createfood/', create_food, name='create_food'),
     path('getfoodbyname/', get_food_by_name, name='get_food_by_name'),
+    path('gettopfood/', get_top_food, name='get_top_food'),
+    path('getpurchasehistory/', get_purchase_history, name='get_purchase_history'),
+    path('deletepurchasehistory/', delete_purchase_history, name='delete_purchase_history'),
+    path('changepurchasehistory/', change_purchase_history, name='change_purchase_history'),
     # food favor
     path('favorfood/', create_food_favor, name='create_food_favor'),
     path('unfavorfood/', delete_food_favor, name='delete_food_favor'),

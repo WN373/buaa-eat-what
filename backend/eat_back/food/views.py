@@ -356,22 +356,50 @@ def get_comment_list(request):
 # buy_food
 # post:
 # {
-#     'food_name': '菜品名称',
-#     'username': '用户名',
+#     'food_name': foodName,
+#     'user_name': user_name
+#     'rate': rate
 # }
+@csrf_exempt
 def buy_food(request):
     if request.method == 'POST':
         food_name = request.POST.get('food_name')
-        username = request.POST.get('username')
-        user = User.objects.filter(username=username)
-        food = FoodInfo.objects.filter(food_name=food_name)
+        user_name = request.POST.get('user_name')
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        rate = float(request.POST.get('rate'))
+        user = User.objects.filter(username=user_name)
+        foods = FoodInfo.objects.filter(food_name=food_name)
         if len(user) == 0:
             return JsonResponse({'code': 400, 'msg': '未找到用户'})
-        if len(food) == 0:
+        if len(foods) == 0:
             return JsonResponse({'code': 400, 'msg': '未找到食物'})
         else:
-            FoodPurchase.objects.create(food=food[0], user=user[0])
+            food = foods[0]
+            food.rating = (food.rating * food.purchases + rate) / (food.purchases + 1)
+            food.purchases = food.purchases + 1
+            food.save()
+            FoodPurchase.objects.create(food=food, user=user[0], rating=rate, date=date, time=time)
             return JsonResponse({'code': 200, 'msg': food_name})
+    else:
+        return JsonResponse({'code': 400, 'msg': request.method})
+    
+    
+    
+def get_top_food(request):
+    if request.method == 'GET':
+        foods = FoodInfo.objects.order_by('purchases')[0:15]
+        data = [{
+            'id': food.id,
+            'food_name': food.food_name,
+            'price': food.price,
+            'tags': ', '.join(food.tags.values_list('name', flat=True)),
+            'rating': food.rating,
+            'stars': food.stars,
+            'purchases': food.purchases,
+            'created': food.created
+        } for food in foods]
+        return JsonResponse({'code': 200, 'msg': data})
     else:
         return JsonResponse({'code': 400, 'msg': request.method})
         
@@ -405,5 +433,87 @@ def post_new_comment(request):
             return JsonResponse({'code': 200, 'msg': '评论成功'})
         except Exception as e:
             return JsonResponse({'code': 400, 'msg': '评论失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+    
+    
+@csrf_exempt
+def get_purchase_history(request):
+    if request.method == 'POST':
+        user_name = request.POST.get('user_name')
+        users = User.objects.filter(username=user_name)
+        if len(users) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的用户'})
+        user = users[0]
+        data = [{
+            'purchase_id': foodPurchase.id,
+            'food_name': foodPurchase.food.food_name,
+            'price': foodPurchase.food.price,
+            'tags': ', '.join(foodPurchase.food.tags.values_list('name', flat=True)),
+            'rating': foodPurchase.food.rating,
+            'stars': foodPurchase.food.stars,
+            'purchases': foodPurchase.food.purchases,
+            'date': foodPurchase.date,
+            'time': foodPurchase.time,
+            'food_id': foodPurchase.food.id
+        }for foodPurchase in FoodPurchase.objects.filter(user=user)]
+        return JsonResponse({'code': 200, 'data': data})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+    
+@csrf_exempt
+def delete_purchase_history(request):
+    if request.method == 'POST':
+        user_name = request.POST.get('user_name')
+        id = request.POST.get('id')
+        users = User.objects.filter(username=user_name)
+        if len(users) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的用户'})
+        user = users[0]
+        foodPurchases = FoodPurchase.objects.filter(user=user, id=int(id))
+        if len(foodPurchases) == 0:
+            return
+        foodPurchases[0].delete()
+        return JsonResponse({'code': 200, 'msg': '成功删除'})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+    
+@csrf_exempt
+def change_purchase_history(request):
+    if request.method == 'POST':
+        user_name = request.POST.get('user_name')
+        id = request.POST.get('id')
+        food_name = request.POST.get('food_name')
+        rate = request.POST.get('rate')
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        
+        
+        users = User.objects.filter(username=user_name)
+        if len(users) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的用户'})
+        user = users[0]
+        
+        foodPurchases = FoodPurchase.objects.filter(user=user, id=int(id))
+        if len(foodPurchases) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的记录'})
+        foodPurchase = foodPurchases[0]
+        
+        foods = FoodInfo.objects.filter(food_name=food_name)
+        if len(foods) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的食物'})
+        food = foods[0]
+        
+        foodPurchase.food = food
+        foodPurchase.user = user
+        foodPurchase.rating = rate
+        food.rating = (food.rating * food.purchases + float(rate)) / food.purchases
+        foodPurchase.date = date
+        foodPurchase.time = time
+        
+        foodPurchase.save()
+        food.save()
+        
+        return JsonResponse({'code': 200, 'msg': '成功修改'})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})

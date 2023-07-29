@@ -32,6 +32,8 @@ class FoodPurchase(models.Model):
     food = models.ForeignKey(FoodInfo, on_delete=models.CASCADE, verbose_name='菜品')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
     rating = models.IntegerField(verbose_name='评分', default=0)
+    date = models.CharField(max_length=128, verbose_name='购买日期', default='', blank=True)
+    time = models.CharField(max_length=128, verbose_name='餐点', default='', blank=True)
     created = models.DateTimeField(auto_now_add=True, verbose_name='购买时间')
 
 class FoodFavor(models.Model):
