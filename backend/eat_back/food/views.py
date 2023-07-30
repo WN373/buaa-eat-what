@@ -7,6 +7,25 @@ from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
 
+# delete_food
+# post:
+# {
+#    'food_name': '菜品名'
+# }
+@csrf_exempt
+def delete_food(request):
+    if request.method == 'POST':
+        try:
+            food_name = request.POST.get('food_name')
+            food = FoodInfo.objects.get(food_name=food_name)
+            food.delete()
+            return JsonResponse({'code': 200, 'msg': '删除成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '删除失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
 # recommend
 # get:
 # {

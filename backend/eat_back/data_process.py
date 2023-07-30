@@ -4,7 +4,7 @@ import requests as rq
 import json
 
 # 1. 读取数据
-f = open('foodlist4.csv', encoding='utf-8')
+f = open('foodlist5.csv', encoding='utf-8')
 df = pd.read_csv(f)
 # print(df.head())
 
