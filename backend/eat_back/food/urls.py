@@ -15,6 +15,7 @@ urlpatterns = [
     path('getpurchasehistory/', get_purchase_history, name='get_purchase_history'),
     path('deletepurchasehistory/', delete_purchase_history, name='delete_purchase_history'),
     path('changepurchasehistory/', change_purchase_history, name='change_purchase_history'),
+    path('addpurchase', add_purchase, name='add_purchase'),
     # food favor
     path('favorfood/', create_food_favor, name='create_food_favor'),
     path('unfavorfood/', delete_food_favor, name='delete_food_favor'),
