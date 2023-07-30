@@ -283,15 +283,27 @@ def get_counter_favor(request):
             username = request.GET.get('username')
             user = User.objects.get(username=username)
             region_name = request.GET.get('region_name')
-            region = RegionInfo.objects.get(region_name=region_name)
-            counter_favors = CounterFavor.objects.filter(user=user, counter__region=region).order_by('-created')
-            data = [{
-                'id': counter_favor.id,
-                'counter_name': counter_favor.counter.counter_name,
-                'username': counter_favor.user.username,
-                'created': counter_favor.created
-            } for counter_favor in counter_favors]
-            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+            if region_name == '':
+                counter_favors = CounterFavor.objects.filter(user=user).order_by('-created')
+                data = [{
+                    'id': counter_favor.id,
+                    'counter_name': counter_favor.counter.counter_name,
+                    'region_name': counter_favor.counter.region.region_name,
+                    'username': counter_favor.user.username,
+                    'created': counter_favor.created
+                } for counter_favor in counter_favors]
+                return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
+            else:
+                region = RegionInfo.objects.get(region_name=region_name)
+                counter_favors = CounterFavor.objects.filter(user=user, counter__region=region).order_by('-created')
+                data = [{
+                    'id': counter_favor.id,
+                    'counter_name': counter_favor.counter.counter_name,
+                    'region_name': counter_favor.counter.region.region_name,
+                    'username': counter_favor.user.username,
+                    'created': counter_favor.created
+                } for counter_favor in counter_favors]
+                return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data})
         except Exception as e:
             return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
     else:
