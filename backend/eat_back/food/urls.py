@@ -4,6 +4,9 @@ from .views import *
 
 # food/
 urlpatterns = [
+    # recommendation
+    path('recommend/', recommend, name='recommend'),
+    # food purchase
     path('buyfood/', buy_food, name='buy_food'),
     # food comments
     path('comment/', get_comment_list, name='get_comment_list'),

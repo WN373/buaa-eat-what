@@ -7,6 +7,68 @@ from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
 
+# recommend
+# get:
+# {
+#    'dining_time': '用餐时间', 早餐 | 正餐 | ''(空)
+#    'prompt': '提示',
+#    'username': '用户名',
+#    'length': '推荐数量'
+# }
+def recommend(request):
+    if request.method == 'GET':
+        try:
+            dining_time = request.GET.get('dining_time')
+            prompt = request.GET.get('prompt')
+            username = request.GET.get('username')
+            length = int(request.GET.get('length'))
+            user = User.objects.get(username=username)
+            personal_rank = [[i, 0.0] for i in range(0, 700)]
+            user_favor = FoodFavor.objects.filter(user=user)
+            for favor in user_favor:
+                if dining_time in [tag.name for tag in favor.food.tags.all()]:
+                    personal_rank[favor.food.id][1] += 1.0
+            user_purchase = FoodPurchase.objects.filter(user=user)
+            for purchase in user_purchase:
+                if dining_time in [tag.name for tag in purchase.food.tags.all()]:
+                    personal_rank[purchase.food.id][1] += purchase.rating / 5.0 - 0.5
+            in_time_food = FoodInfo.objects.filter(tags__name__in=[dining_time])
+            counted = []
+            for food in in_time_food:
+                personal_rank[food.id][1] += food.rating
+                counted.append(food.id)
+            for i in range(0, 700):
+                if i not in counted:
+                    personal_rank[i][1] -= 10.0
+            # all_foods = FoodInfo.objects.all()
+            # for food in all_foods:
+            #     if food not in in_time_food:
+            #         personal_rank[food.id][1] -= 10.0
+            personal_rank.sort(key=lambda x: x[1], reverse=True)
+            data = []
+            for i in range(0, length):
+                id = personal_rank[i][0]
+                try:
+                    food = FoodInfo.objects.get(id=id)
+                except FoodInfo.DoesNotExist:
+                    break
+                data.append({
+                    'id': id,
+                    'food_name': food.food_name,
+                    'price': food.price,
+                    # 'tags': [tag.name for tag in food.tags.all()],
+                    # 'region_name': food.region.region_name,
+                    # 'counter_name': food.counter.counter_name,
+                    # 'photo_url': food.photo_url,
+                    # 'rating': food.rating,
+                })
+            return JsonResponse({'code': 200, 'msg': '推荐成功', 'data': data})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '推荐失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
 # create_region
 # post:
 # {
@@ -24,6 +86,7 @@ def create_region(request):
             return JsonResponse({'code': 400, 'msg': '创建失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # delete_region
 # post:
@@ -45,6 +108,7 @@ def delete_region(request):
             return JsonResponse({'code': 400, 'msg': '删除失败(可能出现未完全的删除，请咨询管理员)', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # get_regions
 # get:
@@ -86,6 +150,7 @@ def create_counter(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 # delete_counter
 # post:
 # {
@@ -106,6 +171,7 @@ def delete_counter(request):
             return JsonResponse({'code': 400, 'msg': '删除失败(可能出现未完全的删除，请咨询管理员)', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # get_counters_by_region
 # get:
@@ -253,7 +319,7 @@ def modify_counter_favor(request):
 #    'username': '用户名',
 # }
 def get_region_favor(request):
-    if request.method == 'GET' :
+    if request.method == 'GET':
         try:
             username = request.GET.get('username')
             user = User.objects.get(username=username)
@@ -333,6 +399,7 @@ def get_food_favor(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 # create_food
 # post:
 # {
@@ -358,6 +425,7 @@ def create_food(request):
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
+
 # get:
 # { 'food_name': '菜品名称' }
 def get_food_by_name(request):
@@ -374,11 +442,38 @@ def get_food_by_name(request):
             'tags': ', '.join(food.tags.values_list('name', flat=True)),
             'rating': food.rating,
             'stars': food.stars,
+            'comments': food.comments,
             'purchases': food.purchases,
             'photo_url': food.photo_url,
             'created': food.created
         } for food in foods]
         print(data)
+        return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data}, safe=False)
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+def get_food_by_counter(request):
+    if request.method == 'GET':
+        region_name = request.GET.get('region_name')
+        region = RegionInfo.objects.get(region_name=region_name)
+        counter_name = request.GET.get('counter_name')
+        counter = CounterInfo.objects.get(counter_name=counter_name, region=region)
+        foods = FoodInfo.objects.filter(counter=counter)
+        data = [{
+            'id': food.id,
+            'food_name': food.food_name,
+            'price': food.price,
+            'region_name': food.region.region_name,
+            'counter_name': food.counter.counter_name,
+            'tags': ', '.join(food.tags.values_list('name', flat=True)),
+            'rating': food.rating,
+            'stars': food.stars,
+            'comments': food.comments,
+            'purchases': food.purchases,
+            'photo_url': food.photo_url,
+            'created': food.created
+        } for food in foods]
         return JsonResponse({'code': 200, 'msg': '获取成功', 'data': data}, safe=False)
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
@@ -408,8 +503,6 @@ def get_comment_list(request):
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 
-
-    
 # buy_food
 # post:
 # {
@@ -440,7 +533,7 @@ def buy_food(request):
             return JsonResponse({'code': 200, 'msg': food_name})
     else:
         return JsonResponse({'code': 400, 'msg': request.method})
-    
+
 
 @csrf_exempt
 def add_purchase(request):
@@ -462,9 +555,8 @@ def add_purchase(request):
             return JsonResponse({'code': 200, 'msg': food_name})
     else:
         return JsonResponse({'code': 400, 'msg': request.method})
-    
-    
-    
+
+
 def get_top_food(request):
     if request.method == 'GET':
         foods = FoodInfo.objects.order_by('purchases')[0:15]
@@ -483,7 +575,7 @@ def get_top_food(request):
         return JsonResponse({'code': 200, 'msg': data})
     else:
         return JsonResponse({'code': 400, 'msg': request.method})
-        
+
 
 # post_new_comment
 # format:
@@ -506,9 +598,11 @@ def post_new_comment(request):
                 replied = None
             comment = request.POST.get('comment')
             username = request.POST.get('username')
+            is_anonymous = request.POST.get('is_anonymous')
             user = User.objects.get(username=username)
             food = FoodInfo.objects.get(food_name=food_name)
-            FoodComments.objects.create(food_id=food.id, replied_id=replied, user_id=user.id, comment=comment)
+            FoodComments.objects.create(food_id=food.id, replied_id=replied, user_id=user.id,
+                                        comment=comment, is_anonymous=is_anonymous)
             food.comments += 1
             food.save()
             return JsonResponse({'code': 200, 'msg': '评论成功'})
@@ -516,8 +610,8 @@ def post_new_comment(request):
             return JsonResponse({'code': 400, 'msg': '评论失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
-    
-    
+
+
 @csrf_exempt
 def get_purchase_history(request):
     if request.method == 'POST':
@@ -537,11 +631,12 @@ def get_purchase_history(request):
             'date': foodPurchase.date,
             'time': foodPurchase.time,
             'food_id': foodPurchase.food.id
-        }for foodPurchase in FoodPurchase.objects.filter(user=user)]
+        } for foodPurchase in FoodPurchase.objects.filter(user=user)]
         return JsonResponse({'code': 200, 'data': data})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
-    
+
+
 @csrf_exempt
 def delete_purchase_history(request):
     if request.method == 'POST':
@@ -558,7 +653,8 @@ def delete_purchase_history(request):
         return JsonResponse({'code': 200, 'msg': '成功删除'})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
-    
+
+
 @csrf_exempt
 def change_purchase_history(request):
     if request.method == 'POST':
@@ -568,33 +664,32 @@ def change_purchase_history(request):
         rate = request.POST.get('rate')
         date = request.POST.get('date')
         time = request.POST.get('time')
-        
-        
+
         users = User.objects.filter(username=user_name)
         if len(users) == 0:
             return JsonResponse({'code': 400, 'msg': '不存在的用户'})
         user = users[0]
-        
+
         foodPurchases = FoodPurchase.objects.filter(user=user, id=int(id))
         if len(foodPurchases) == 0:
             return JsonResponse({'code': 400, 'msg': '不存在的记录'})
         foodPurchase = foodPurchases[0]
-        
+
         foods = FoodInfo.objects.filter(food_name=food_name)
         if len(foods) == 0:
             return JsonResponse({'code': 400, 'msg': '不存在的食物'})
         food = foods[0]
-        
+
         foodPurchase.food = food
         foodPurchase.user = user
         foodPurchase.rating = rate
         food.rating = (food.rating * food.purchases + float(rate)) / food.purchases
         foodPurchase.date = date
         foodPurchase.time = time
-        
+
         foodPurchase.save()
         food.save()
-        
+
         return JsonResponse({'code': 200, 'msg': '成功修改'})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
