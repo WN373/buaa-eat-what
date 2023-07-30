@@ -441,6 +441,28 @@ def buy_food(request):
     else:
         return JsonResponse({'code': 400, 'msg': request.method})
     
+
+@csrf_exempt
+def add_purchase(request):
+    if request.method == 'POST':
+        food_name = request.POST.get('food_name')
+        user_name = request.POST.get('user_name')
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        rate = float(request.POST.get('rate'))
+        user = User.objects.filter(username=user_name)
+        foods = FoodInfo.objects.filter(food_name=food_name)
+        if len(user) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到用户'})
+        if len(foods) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到食物'})
+        else:
+            food = foods[0]
+            FoodPurchase.objects.create(food=food, user=user[0], rating=rate, date=date, time=time)
+            return JsonResponse({'code': 200, 'msg': food_name})
+    else:
+        return JsonResponse({'code': 400, 'msg': request.method})
+    
     
     
 def get_top_food(request):
@@ -454,7 +476,9 @@ def get_top_food(request):
             'rating': food.rating,
             'stars': food.stars,
             'purchases': food.purchases,
-            'created': food.created
+            'created': food.created,
+            'region': food.region.region_name,
+            'counter': food.counter.counter_name
         } for food in foods]
         return JsonResponse({'code': 200, 'msg': data})
     else:

@@ -157,7 +157,8 @@ def getTopFood():
         return True
     else:
         return False
-    def buyFood(foodName, username):
+
+def buyFood(foodName, username):
     data = {
         'food_name': foodName,
         'username': username 
