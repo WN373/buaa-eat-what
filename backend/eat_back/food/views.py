@@ -591,8 +591,8 @@ def post_new_comment(request):
     if request.method == 'POST':
         try:
             food_name = request.POST.get('food_name')
-            if 'replied' in request.POST.keys():
-                replied_name = request.POST.get('replied')
+            replied_name = request.POST.get('replied')
+            if replied_name != '':
                 replied = User.objects.get(username=replied_name).id
             else:
                 replied = None
@@ -601,7 +601,7 @@ def post_new_comment(request):
             is_anonymous = request.POST.get('is_anonymous')
             user = User.objects.get(username=username)
             food = FoodInfo.objects.get(food_name=food_name)
-            FoodComments.objects.create(food_id=food.id, replied_id=replied, user_id=user.id,
+            FoodComments.objects.create(food=food, replied_id=replied, user=user,
                                         comment=comment, is_anonymous=is_anonymous)
             food.comments += 1
             food.save()
