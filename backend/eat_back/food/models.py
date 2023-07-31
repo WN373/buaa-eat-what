@@ -64,3 +64,10 @@ class FoodComments(models.Model):
     comment = models.CharField(max_length=256, verbose_name='评论内容')
     is_anonymous = models.BooleanField(default=False, verbose_name='是否匿名', blank=True)
     created = models.DateTimeField(auto_now_add=True, verbose_name='评论时间')
+    
+ 
+class FoodBuy(models.Model):
+    id = models.AutoField(primary_key=True)
+    food = models.ForeignKey(FoodInfo, on_delete=models.CASCADE, verbose_name='菜品')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='收藏时间')
