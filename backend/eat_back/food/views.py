@@ -6,6 +6,29 @@ from django.http import JsonResponse
 from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
+# check_user_purchase
+# get:
+# {
+#    'username': '用户名',
+#    'food_name': '菜品名'
+# }
+def check_user_purchase(request):
+    if request.method == 'GET':
+        try:
+            username = request.GET.get('username')
+            food_name = request.GET.get('food_name')
+            user = User.objects.get(username=username)
+            food = FoodInfo.objects.get(food_name=food_name)
+            food_purchase = FoodPurchase.objects.filter(user=user, food=food)
+            if food_purchase.count() != 0:
+                return JsonResponse({'code': 200, 'msg': '已购买', 'data': {'status': True}})
+            else:
+                return JsonResponse({'code': 200, 'msg': '未购买', 'data': {'status': False}})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '查询失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
 
 # delete_food
 # post:

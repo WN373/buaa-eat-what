@@ -7,6 +7,7 @@ urlpatterns = [
     # recommendation
     path('recommend/', recommend, name='recommend'),
     # food purchase
+    path('checkpurchase/', check_user_purchase, name='check_user_purchase'),
     path('buyfood/', buy_food, name='buy_food'),
     # food comments
     path('comment/', get_comment_list, name='get_comment_list'),
