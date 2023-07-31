@@ -6,6 +6,75 @@ from django.http import JsonResponse
 from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
+# modify_food
+# post:
+# {
+#    'old_food_name': '旧菜品名',
+#    'new_food_name': '新菜品名'
+#    'new_food_price': '新菜品价格'
+# }
+@csrf_exempt
+def modify_food(request):
+    if request.method == 'POST':
+        try:
+            old_food_name = request.POST.get('old_food_name')
+            new_food_name = request.POST.get('new_food_name')
+            new_food_price = request.POST.get('new_food_price')
+            food = FoodInfo.objects.get(food_name=old_food_name)
+            food.food_name = new_food_name
+            food.price = new_food_price
+            food.save()
+            return JsonResponse({'code': 200, 'msg': '修改成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '修改失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+# modify_counter
+# post:
+# {
+#    'region_name': '区域名',
+#    'counter_name': '柜台名'
+#    'new_counter_name': '新柜台名'
+# }
+@csrf_exempt
+def modify_counter(request):
+    if request.method == 'POST':
+        try:
+            region_name = request.POST.get('region_name')
+            counter_name = request.POST.get('counter_name')
+            new_counter_name = request.POST.get('new_counter_name')
+            region = RegionInfo.objects.get(region_name=region_name)
+            counter = CounterInfo.objects.get(region=region, counter_name=counter_name)
+            counter.counter_name = new_counter_name
+            counter.save()
+            return JsonResponse({'code': 200, 'msg': '修改成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '修改失败', 'error': str(e)})
+
+
+# modify_region
+# post:
+# {
+#    'old_region_name': '旧区域名',
+#    'new_region_name': '新区域名'
+# }
+@csrf_exempt
+def modify_region(request):
+    if request.method == 'POST':
+        try:
+            old_region_name = request.POST.get('old_region_name')
+            new_region_name = request.POST.get('new_region_name')
+            region = RegionInfo.objects.get(region_name=old_region_name)
+            region.region_name = new_region_name
+            region.save()
+            return JsonResponse({'code': 200, 'msg': '修改成功'})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '修改失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
 # check_user_purchase
 # get:
 # {
@@ -58,6 +127,15 @@ def delete_food(request):
 #    'length': '推荐数量'
 # }
 def recommend(request):
+    def strContainStr2(self, str1: str, str2: str) -> bool:
+        # 如果str1包含了str2中的某个字符, 直接返回True
+        if str2 == '':
+            return True
+        for c in str2:
+            if str1.find(c) != -1:
+                return True
+        return False
+
     if request.method == 'GET':
         try:
             dining_time = request.GET.get('dining_time')
@@ -74,10 +152,13 @@ def recommend(request):
             for purchase in user_purchase:
                 if dining_time in [tag.name for tag in purchase.food.tags.all()]:
                     personal_rank[purchase.food.id][1] += purchase.rating / 5.0 - 0.5
+
             in_time_food = FoodInfo.objects.filter(tags__name__in=[dining_time])
             counted = []
             for food in in_time_food:
                 personal_rank[food.id][1] += food.rating
+                if strContainStr2(food.food_name, prompt):
+                    personal_rank[food.id][1] += 1.0
                 counted.append(food.id)
             for i in range(0, 700):
                 if i not in counted:
@@ -529,18 +610,21 @@ def get_food_by_counter(request):
 # }
 def get_comment_list(request):
     if request.method == 'GET':
-        food_name = request.GET.get('food_name')
-        food = FoodInfo.objects.get(food_name=food_name)
-        comments = FoodComments.objects.filter(food=food).order_by('-created')
-        comment_list = [{
-            'id': comment.id,
-            'comment': comment.comment,
-            'username': comment.user.username,
-            'is_anonymous': comment.is_anonymous,
-            'replied': comment.replied.username if comment.replied else None,
-            'created': comment.created
-        } for comment in comments]
-        return JsonResponse({'code': 200, 'msg': '获取评论成功', 'data': comment_list})
+        try:
+            food_name = request.GET.get('food_name')
+            food = FoodInfo.objects.get(food_name=food_name)
+            comments = FoodComments.objects.filter(food=food).order_by('-created')
+            comment_list = [{
+                'id': comment.id,
+                'comment': comment.comment,
+                'username': comment.user.username,
+                'is_anonymous': comment.is_anonymous,
+                'replied': comment.replied.user.username if comment.replied else None,
+                'created': comment.created
+            } for comment in comments]
+            return JsonResponse({'code': 200, 'msg': '获取评论成功', 'data': comment_list})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取评论失败', 'error': str(e)})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
