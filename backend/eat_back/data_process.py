@@ -4,7 +4,7 @@ import requests as rq
 import json
 
 # 1. 读取数据
-f = open('foodlist5.csv', encoding='utf-8')
+f = open('foodlist6.csv', encoding='utf-8')
 df = pd.read_csv(f)
 # print(df.head())
 
@@ -53,7 +53,7 @@ for row in df.itertuples():
         print(r.text)
         # break
 
-    # break
+    break
 
 errs = pd.DataFrame(unuploaded)
-errs.to_csv('unuploaded4.csv', encoding='utf-8')
+errs.to_csv('unuploaded6.csv', encoding='utf-8')
