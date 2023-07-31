@@ -98,11 +98,11 @@ def recommend(request):
                     'id': id,
                     'food_name': food.food_name,
                     'price': food.price,
-                    # 'tags': [tag.name for tag in food.tags.all()],
-                    # 'region_name': food.region.region_name,
-                    # 'counter_name': food.counter.counter_name,
-                    # 'photo_url': food.photo_url,
-                    # 'rating': food.rating,
+                    'region_name': food.region.region_name,
+                    'counter_name': food.counter.counter_name,
+                    'rating': food.rating,
+                    'stars': food.stars,
+                    'purchases': food.purchases
                 })
             return JsonResponse({'code': 200, 'msg': '推荐成功', 'data': data})
         except Exception as e:
@@ -557,25 +557,49 @@ def buy_food(request):
     if request.method == 'POST':
         food_name = request.POST.get('food_name')
         user_name = request.POST.get('user_name')
-        date = request.POST.get('date')
-        time = request.POST.get('time')
-        rate = float(request.POST.get('rate'))
-        user = User.objects.filter(username=user_name)
+        users = User.objects.filter(username=user_name)
         foods = FoodInfo.objects.filter(food_name=food_name)
-        if len(user) == 0:
+        if len(users) == 0:
             return JsonResponse({'code': 400, 'msg': '未找到用户'})
         if len(foods) == 0:
             return JsonResponse({'code': 400, 'msg': '未找到食物'})
         else:
             food = foods[0]
-            food.rating = (food.rating * food.purchases + rate) / (food.purchases + 1)
+            user = users[0]
             food.purchases = food.purchases + 1
             food.save()
-            FoodPurchase.objects.create(food=food, user=user[0], rating=rate, date=date, time=time)
+            FoodBuy.objects.create(food, user)
             return JsonResponse({'code': 200, 'msg': food_name})
     else:
         return JsonResponse({'code': 400, 'msg': request.method})
-
+    
+    
+@csrf_exempt
+def get_buy_food(request):
+    if request.method == 'POST':
+        user_name = request.POST.get('user_name')
+        users = User.objects.filter(username=user_name)
+        if len(users) == 0:
+            return JsonResponse({'code': 400, 'msg': '未找到用户'})
+        else:
+            user = users[0]
+            foods = FoodBuy.objects.filter(user=user)
+            data = [{
+            'id': food.id,
+            'food_name': food.food_name,
+            'price': food.price,
+            'tags': ', '.join(food.tags.values_list('name', flat=True)),
+            'rating': food.rating,
+            'stars': food.stars,
+            'purchases': food.purchases,
+            'created': food.created,
+            'region': food.region.region_name,
+            'counter': food.counter.counter_name
+        } for food in foods]
+        return JsonResponse({'code': 200, 'msg': data})
+    else:
+        return JsonResponse({'code': 400, 'msg': request.method})
+   
 
 @csrf_exempt
 def add_purchase(request):
@@ -601,7 +625,7 @@ def add_purchase(request):
 
 def get_top_food(request):
     if request.method == 'GET':
-        foods = FoodInfo.objects.order_by('purchases')[0:15]
+        foods = FoodInfo.objects.order_by('-purchases')[0:15]
         data = [{
             'id': food.id,
             'food_name': food.food_name,
@@ -683,12 +707,12 @@ def get_purchase_history(request):
 def delete_purchase_history(request):
     if request.method == 'POST':
         user_name = request.POST.get('user_name')
-        id = request.POST.get('id')
+        purchase_id = request.POST.get('id')
         users = User.objects.filter(username=user_name)
         if len(users) == 0:
             return JsonResponse({'code': 400, 'msg': '不存在的用户'})
         user = users[0]
-        foodPurchases = FoodPurchase.objects.filter(user=user, id=int(id))
+        foodPurchases = FoodPurchase.objects.filter(user=user, id=int(purchase_id))
         if len(foodPurchases) == 0:
             return
         foodPurchases[0].delete()
@@ -701,7 +725,7 @@ def delete_purchase_history(request):
 def change_purchase_history(request):
     if request.method == 'POST':
         user_name = request.POST.get('user_name')
-        id = request.POST.get('id')
+        purchase_id = request.POST.get('id')
         food_name = request.POST.get('food_name')
         rate = request.POST.get('rate')
         date = request.POST.get('date')
@@ -711,8 +735,7 @@ def change_purchase_history(request):
         if len(users) == 0:
             return JsonResponse({'code': 400, 'msg': '不存在的用户'})
         user = users[0]
-
-        foodPurchases = FoodPurchase.objects.filter(user=user, id=int(id))
+        foodPurchases = FoodPurchase.objects.filter(user=user, id=int(purchase_id))
         if len(foodPurchases) == 0:
             return JsonResponse({'code': 400, 'msg': '不存在的记录'})
         foodPurchase = foodPurchases[0]
@@ -725,7 +748,7 @@ def change_purchase_history(request):
         foodPurchase.food = food
         foodPurchase.user = user
         foodPurchase.rating = rate
-        food.rating = (food.rating * food.purchases + float(rate)) / food.purchases
+        food.rating = rate
         foodPurchase.date = date
         foodPurchase.time = time
 
@@ -733,5 +756,23 @@ def change_purchase_history(request):
         food.save()
 
         return JsonResponse({'code': 200, 'msg': '成功修改'})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+    
+@csrf_exempt
+def get_food_by_region(request):
+    if request.method == 'POST':
+        region_name = request.POST.get('region_name')
+        counter_name = request.POST.get('counter_name')
+        regions = RegionInfo.objects.filter(region_name=region_name)
+        counters = CounterInfo.objects.filter(counter_name=counter_name)
+        if len(counters) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的柜台'})
+        if len(regions) == 0:
+            return JsonResponse({'code': 400, 'msg': '不存在的食堂'})
+        region = regions[0]
+        counter = counters[0]
+        data = FoodInfo.objects.filter(region=region, counter=counter)
+        return JsonResponse({'code': 200, 'data': data})
     else:
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})

@@ -201,6 +201,6 @@ def changePurchaseHistory(user_name, id, food_name, rate, date, time):
 
 
 # Create your tests here.
-
+changePurchaseHistory('nr2', 19, '豆浆', 3, '2023-07-14', '其他')
 
 
