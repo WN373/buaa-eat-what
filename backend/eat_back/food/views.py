@@ -98,11 +98,11 @@ def recommend(request):
                     'id': id,
                     'food_name': food.food_name,
                     'price': food.price,
-                    # 'tags': [tag.name for tag in food.tags.all()],
-                    # 'region_name': food.region.region_name,
-                    # 'counter_name': food.counter.counter_name,
-                    # 'photo_url': food.photo_url,
-                    # 'rating': food.rating,
+                    'region_name': food.region.region_name,
+                    'counter_name': food.counter.counter_name,
+                    'rating': food.rating,
+                    'stars': food.stars,
+                    'purchases': food.purchases
                 })
             return JsonResponse({'code': 200, 'msg': '推荐成功', 'data': data})
         except Exception as e:
