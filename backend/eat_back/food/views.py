@@ -7,6 +7,7 @@ from .forms import FoodInfoForm
 from django.views.decorators.csrf import csrf_exempt
 
 # modify_food
+# /food/modifyfood/
 # post:
 # {
 #    'old_food_name': '旧菜品名',
@@ -31,6 +32,7 @@ def modify_food(request):
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 # modify_counter
+# /food/modifycounter/
 # post:
 # {
 #    'region_name': '区域名',
@@ -54,6 +56,7 @@ def modify_counter(request):
 
 
 # modify_region
+# /food/modifyregion/
 # post:
 # {
 #    'old_region_name': '旧区域名',
