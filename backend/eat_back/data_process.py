@@ -53,7 +53,7 @@ for row in df.itertuples():
         print(r.text)
         # break
 
-    break
+    # break
 
 errs = pd.DataFrame(unuploaded)
 errs.to_csv('unuploaded6.csv', encoding='utf-8')
