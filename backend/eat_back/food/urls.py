@@ -4,12 +4,17 @@ from .views import *
 
 # food/
 urlpatterns = [
+    # recommendation
+    path('recommend/', recommend, name='recommend'),
+    # food purchase
+    path('checkpurchase/', check_user_purchase, name='check_user_purchase'),
     path('buyfood/', buy_food, name='buy_food'),
     # food comments
     path('comment/', get_comment_list, name='get_comment_list'),
     path('commenton/', post_new_comment, name='post_new_comment'),
     # food info
     path('createfood/', create_food, name='create_food'),
+    path('deletefood/', delete_food, name='delete_food'),
     path('getfoodbyname/', get_food_by_name, name='get_food_by_name'),
     path('gettopfood/', get_top_food, name='get_top_food'),
     path('getpurchasehistory/', get_purchase_history, name='get_purchase_history'),

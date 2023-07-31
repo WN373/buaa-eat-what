@@ -66,6 +66,30 @@ def modify_password(request):
         return JsonResponse({'code': 400, 'msg': '请求方式错误'})
 
 
+# get_personal_info
+# /login/info/
+# get:
+# {
+#   'username': '用户名',
+# }
+def get_personal_info(request):
+    if request.method == 'GET':
+        try:
+            username = request.GET.get('username')
+            user = models.User.objects.get(username=username)
+            return JsonResponse({'code': 200, 'msg': '获取成功', 'data': {
+                'username': user.username,
+                'email': user.email,
+                'join_date': user.date_joined,
+                'last_login': user.last_login,
+            }})
+        except Exception as e:
+            return JsonResponse({'code': 400, 'msg': '获取失败', 'error': str(e)})
+    else:
+        return JsonResponse({'code': 400, 'msg': '请求方式错误'})
+
+
+
 def logout_view(request):
     logout(request)
     return redirect('index')
